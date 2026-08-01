@@ -1,0 +1,16 @@
+用途：Godot 4.7 移动端 RTS/SLG 地图的无缝草地基础纹理
+生成方式：内置 image_gen
+视觉参考：res://map/assets/models/rts_city_hy3d31_texture_pbr_20250901.png
+
+Use case: stylized-concept
+Asset type: seamless terrain albedo texture for a Godot 4.7 mobile RTS/SLG map
+Input image: use the supplied Chinese ancient city model albedo only as a palette and material-style reference, not as an edit target
+Primary request: create one square, genuinely seamless, edge-to-edge tileable grassland ground texture for a 2.5D overhead ancient Chinese Three Kingdoms strategy map
+Style/medium: clean HD hand-painted game terrain, grounded PBR-like albedo detail, readable from an orthographic 35–80 degree camera, compatible with the muted realistic city asset
+Color palette: low-saturation olive green, moss green, dry straw, restrained warm earth-brown; slightly darker and calmer than the city courtyards
+Surface detail: short flattened grass, subtle soil peeking through, very fine irregular organic variation, restrained macro patches; no obvious repeated motifs
+Lighting: neutral flat albedo, no directional light, no baked highlights, no ambient occlusion, no cast shadows
+Composition: uniform full-frame texture with meaningful detail everywhere; all four edges must connect seamlessly; no border or vignette
+Constraints: foundation-only ground art; no trees, bushes, flowers, rocks, buildings, walls, roads, rivers, footprints, props, units, UI, text, labels, grid lines, tile outlines, perspective horizon, watermark; no large isolated feature that reveals repetition; not pixel art
+
+后处理：缩放到 1024×1024，并通过镜像拼接后的中心裁切保证四边像素连续。

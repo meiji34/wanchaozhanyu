@@ -1,0 +1,296 @@
+{
+  "project": "rts_environment_model_refs",
+  "version": "2026-07-29",
+  "target": [
+    "Blender modeling reference",
+    "Godot 4.7.1"
+  ],
+  "palette": {
+    "name": "Three Kingdoms Natural Terrain 48",
+    "colors": [
+      "#17151A",
+      "#211C20",
+      "#2B2526",
+      "#332D2B",
+      "#3A3A38",
+      "#454640",
+      "#51534B",
+      "#5E6055",
+      "#6B6D60",
+      "#797A6C",
+      "#888779",
+      "#979487",
+      "#A7A295",
+      "#B7B0A1",
+      "#C6BDAA",
+      "#D5CBB7",
+      "#3A2A24",
+      "#4A3328",
+      "#5B3D2E",
+      "#6C4935",
+      "#7D563D",
+      "#906747",
+      "#A57955",
+      "#BA8E67",
+      "#2D1E1B",
+      "#3B261F",
+      "#4A2F24",
+      "#59382A",
+      "#684431",
+      "#795139",
+      "#8B6043",
+      "#A0714F",
+      "#1F2B22",
+      "#293729",
+      "#344632",
+      "#40553B",
+      "#4D6545",
+      "#5B7650",
+      "#6A875D",
+      "#7A986B",
+      "#8CAA79",
+      "#9DBC88",
+      "#AFCB98",
+      "#C2D7AA",
+      "#38443A",
+      "#536050",
+      "#707A64",
+      "#909879"
+    ]
+  },
+  "tree_sheet": {
+    "layout": "3x2",
+    "cell_size": [
+      512,
+      512
+    ],
+    "view_order": [
+      "front",
+      "right",
+      "rear",
+      "left",
+      "top",
+      "isometric"
+    ]
+  },
+  "mountain_sheet": {
+    "layout": "3x4",
+    "cell_size": [
+      512,
+      512
+    ],
+    "columns": [
+      "sharp_peak",
+      "long_ridge",
+      "rounded_cluster"
+    ],
+    "rows": [
+      "front",
+      "side",
+      "top",
+      "isometric"
+    ]
+  },
+  "assets": [
+    {
+      "name": "rts_ancient_pine_multiview",
+      "file": "sprites/rts_ancient_pine_multiview.png",
+      "width": 1536,
+      "height": 1024,
+      "colors": 28,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "master_sheet"
+    },
+    {
+      "name": "rts_ancient_pine_view_front",
+      "file": "sprites/rts_ancient_pine_view_front.png",
+      "width": 512,
+      "height": 512,
+      "colors": 28,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_ancient_pine_view_isometric",
+      "file": "sprites/rts_ancient_pine_view_isometric.png",
+      "width": 512,
+      "height": 512,
+      "colors": 28,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_ancient_pine_view_left",
+      "file": "sprites/rts_ancient_pine_view_left.png",
+      "width": 512,
+      "height": 512,
+      "colors": 28,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_ancient_pine_view_rear",
+      "file": "sprites/rts_ancient_pine_view_rear.png",
+      "width": 512,
+      "height": 512,
+      "colors": 28,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_ancient_pine_view_right",
+      "file": "sprites/rts_ancient_pine_view_right.png",
+      "width": 512,
+      "height": 512,
+      "colors": 28,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_ancient_pine_view_top",
+      "file": "sprites/rts_ancient_pine_view_top.png",
+      "width": 512,
+      "height": 512,
+      "colors": 28,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountain_long_ridge_view_front",
+      "file": "sprites/rts_mountain_long_ridge_view_front.png",
+      "width": 512,
+      "height": 512,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountain_long_ridge_view_isometric",
+      "file": "sprites/rts_mountain_long_ridge_view_isometric.png",
+      "width": 512,
+      "height": 512,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountain_long_ridge_view_side",
+      "file": "sprites/rts_mountain_long_ridge_view_side.png",
+      "width": 512,
+      "height": 512,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountain_long_ridge_view_top",
+      "file": "sprites/rts_mountain_long_ridge_view_top.png",
+      "width": 512,
+      "height": 512,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountain_rounded_cluster_view_front",
+      "file": "sprites/rts_mountain_rounded_cluster_view_front.png",
+      "width": 512,
+      "height": 512,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountain_rounded_cluster_view_isometric",
+      "file": "sprites/rts_mountain_rounded_cluster_view_isometric.png",
+      "width": 512,
+      "height": 512,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountain_rounded_cluster_view_side",
+      "file": "sprites/rts_mountain_rounded_cluster_view_side.png",
+      "width": 512,
+      "height": 512,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountain_rounded_cluster_view_top",
+      "file": "sprites/rts_mountain_rounded_cluster_view_top.png",
+      "width": 512,
+      "height": 512,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountain_sharp_peak_view_front",
+      "file": "sprites/rts_mountain_sharp_peak_view_front.png",
+      "width": 512,
+      "height": 512,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountain_sharp_peak_view_isometric",
+      "file": "sprites/rts_mountain_sharp_peak_view_isometric.png",
+      "width": 512,
+      "height": 512,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountain_sharp_peak_view_side",
+      "file": "sprites/rts_mountain_sharp_peak_view_side.png",
+      "width": 512,
+      "height": 512,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountain_sharp_peak_view_top",
+      "file": "sprites/rts_mountain_sharp_peak_view_top.png",
+      "width": 512,
+      "height": 512,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "modeling_view"
+    },
+    {
+      "name": "rts_mountains_multiview",
+      "file": "sprites/rts_mountains_multiview.png",
+      "width": 1536,
+      "height": 2048,
+      "colors": 36,
+      "alpha": "binary",
+      "animation": "none",
+      "kind": "master_sheet"
+    }
+  ]
+}
