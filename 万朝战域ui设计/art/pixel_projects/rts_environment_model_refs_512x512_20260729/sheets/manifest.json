@@ -1,0 +1,304 @@
+{
+  "sheets": [
+    {
+      "file": "backgrounds_rts_ancient_pine_multiview_1536x1024.png",
+      "category": "backgrounds",
+      "animation": "rts_ancient_pine_multiview",
+      "tile_size": {
+        "width": 1536,
+        "height": 1024
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_ancient_pine_multiview"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_ancient_pine_view_front_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_ancient_pine_view_front",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_ancient_pine_view_front"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_ancient_pine_view_isometric_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_ancient_pine_view_isometric",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_ancient_pine_view_isometric"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_ancient_pine_view_left_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_ancient_pine_view_left",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_ancient_pine_view_left"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_ancient_pine_view_rear_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_ancient_pine_view_rear",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_ancient_pine_view_rear"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_ancient_pine_view_right_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_ancient_pine_view_right",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_ancient_pine_view_right"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_ancient_pine_view_top_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_ancient_pine_view_top",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_ancient_pine_view_top"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountain_long_ridge_view_front_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_mountain_long_ridge_view_front",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountain_long_ridge_view_front"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountain_long_ridge_view_isometric_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_mountain_long_ridge_view_isometric",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountain_long_ridge_view_isometric"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountain_long_ridge_view_side_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_mountain_long_ridge_view_side",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountain_long_ridge_view_side"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountain_long_ridge_view_top_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_mountain_long_ridge_view_top",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountain_long_ridge_view_top"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountain_rounded_cluster_view_front_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_mountain_rounded_cluster_view_front",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountain_rounded_cluster_view_front"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountain_rounded_cluster_view_isometric_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_mountain_rounded_cluster_view_isometric",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountain_rounded_cluster_view_isometric"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountain_rounded_cluster_view_side_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_mountain_rounded_cluster_view_side",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountain_rounded_cluster_view_side"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountain_rounded_cluster_view_top_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_mountain_rounded_cluster_view_top",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountain_rounded_cluster_view_top"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountain_sharp_peak_view_front_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_mountain_sharp_peak_view_front",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountain_sharp_peak_view_front"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountain_sharp_peak_view_isometric_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_mountain_sharp_peak_view_isometric",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountain_sharp_peak_view_isometric"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountain_sharp_peak_view_side_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_mountain_sharp_peak_view_side",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountain_sharp_peak_view_side"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountain_sharp_peak_view_top_512x512.png",
+      "category": "backgrounds",
+      "animation": "rts_mountain_sharp_peak_view_top",
+      "tile_size": {
+        "width": 512,
+        "height": 512
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountain_sharp_peak_view_top"
+      ]
+    },
+    {
+      "file": "backgrounds_rts_mountains_multiview_1536x2048.png",
+      "category": "backgrounds",
+      "animation": "rts_mountains_multiview",
+      "tile_size": {
+        "width": 1536,
+        "height": 2048
+      },
+      "columns": 1,
+      "rows": 1,
+      "frame_count": 1,
+      "frames": [
+        "rts_mountains_multiview"
+      ]
+    }
+  ]
+}

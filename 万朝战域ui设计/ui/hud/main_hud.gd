@@ -3,141 +3,304 @@ extends Control
 const RESOURCE_BAR_SCENE := preload("res://ui/components/resource_bar.tscn")
 const TASK_PANEL_SCENE := preload("res://ui/components/task_panel.tscn")
 const MAP_AREA_SCENE := preload("res://ui/components/map_area.tscn")
+const WIDE_LAYOUT_MIN_WIDTH := 1440.0
 
+const PRIMARY_ROUTES: Array[Dictionary] = [
+	{"label": "城池", "route": "city"},
+	{"label": "武将", "route": "generals"},
+	{"label": "联盟", "route": "alliance"},
+	{"label": "路线", "route": "route"},
+	{"label": "军令", "route": "battle"},
+]
+const MORE_ROUTES: Array[Dictionary] = [
+	{"label": "全服事件", "route": "world_event"},
+	{"label": "赛季结算", "route": "season"},
+	{"label": "NPC 对话", "route": "npc"},
+	{"label": "流亡", "route": "exile"},
+	{"label": "复兴", "route": "revival"},
+	{"label": "反攻", "route": "counterattack"},
+	{"label": "UI 演示", "route": "ui_demo"},
+	{"label": "设置", "route": "settings"},
+]
+
+var _map_area: MapArea
 var _resource_bar: ResourceBar
 var _task_panel: TaskPanel
+var _task_toggle: Button
 var _status_panel: PanelContainer
 var _status_grid: GridContainer
+var _more_panel: PanelContainer
+var _selection_panel: PanelContainer
+var _selection_title: Label
+var _selection_details: Label
+var _selection_action: Button
+var _identity_label: Label
+var _safe: SafeAreaContainer
+var _current_selection: Dictionary = {}
+var _task_drawer_requested := false
 
 
 func _ready() -> void:
 	_build_ui()
 	_connect_mock_signals()
 	_refresh_all()
+	get_viewport().size_changed.connect(_apply_responsive_layout)
+	call_deferred("_apply_responsive_layout")
 
 
 func _exit_tree() -> void:
+	if get_viewport() != null and get_viewport().size_changed.is_connected(_apply_responsive_layout):
+		get_viewport().size_changed.disconnect(_apply_responsive_layout)
 	if MockData.resources_changed.is_connected(_on_resources_changed):
 		MockData.resources_changed.disconnect(_on_resources_changed)
 	if MockData.tasks_changed.is_connected(_on_tasks_changed):
 		MockData.tasks_changed.disconnect(_on_tasks_changed)
+	if MockData.selected_server_changed.is_connected(_on_selected_server_changed):
+		MockData.selected_server_changed.disconnect(_on_selected_server_changed)
 
 
 func _build_ui() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var background := ColorRect.new()
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	background.color = Color("0e0d0c")
+	background.color = Color("11130f")
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(background)
 
-	var safe := SafeAreaContainer.new()
-	safe.minimum_safe_padding = 18
-	add_child(safe)
-	var root_box := VBoxContainer.new()
-	root_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	UIBuilder.set_box_spacing(root_box, 12)
-	safe.add_child(root_box)
+	_safe = SafeAreaContainer.new()
+	_safe.minimum_safe_padding = 14
+	add_child(_safe)
+	_map_area = MAP_AREA_SCENE.instantiate() as MapArea
+	_map_area.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_safe.add_child(_map_area)
+	_map_area.selection_changed.connect(_on_map_selection_changed)
+	_map_area.selection_cleared.connect(_on_map_selection_cleared)
+	_map_area.map_load_failed.connect(_on_map_load_failed)
 
+	var overlay := Control.new()
+	overlay.name = "HUDOverlay"
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_safe.add_child(overlay)
+
+	_build_command_bar(overlay)
+	_build_task_drawer(overlay)
+	_build_bottom_navigation(overlay)
+	_build_status_panel(overlay)
+	_build_more_panel(overlay)
+	_build_selection_panel(overlay)
+
+
+func _build_command_bar(parent: Control) -> void:
+	var command_bar := PanelContainer.new()
+	command_bar.name = "CommandBar"
+	command_bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	command_bar.offset_bottom = 80
+	parent.add_child(command_bar)
+	var row := HBoxContainer.new()
+	UIBuilder.set_box_spacing(row, 10)
+	command_bar.add_child(row)
+	_identity_label = UIBuilder.make_label("执棋者\n桃园结义 · 流畅", 16, UIBuilder.COLOR_TEXT)
+	_identity_label.custom_minimum_size.x = 178
+	_identity_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(_identity_label)
+	var divider := VSeparator.new()
+	row.add_child(divider)
 	_resource_bar = RESOURCE_BAR_SCENE.instantiate() as ResourceBar
+	_resource_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_resource_bar.more_status_requested.connect(_toggle_status_panel)
-	_resource_bar.demo_update_requested.connect(MockData.apply_demo_resource_update)
-	root_box.add_child(_resource_bar)
+	row.add_child(_resource_bar)
 
-	var workspace := HBoxContainer.new()
-	workspace.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	UIBuilder.set_box_spacing(workspace, 12)
-	root_box.add_child(workspace)
+
+func _build_task_drawer(parent: Control) -> void:
+	_task_toggle = UIBuilder.make_button("任务", 76)
+	_task_toggle.name = "TaskToggle"
+	_task_toggle.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_task_toggle.position = Vector2(10, 92)
+	_task_toggle.custom_minimum_size = Vector2(76, 56)
+	_task_toggle.pressed.connect(_toggle_task_drawer)
+	parent.add_child(_task_toggle)
 
 	_task_panel = TASK_PANEL_SCENE.instantiate() as TaskPanel
+	_task_panel.name = "TaskDrawer"
+	_task_panel.set_anchors_preset(Control.PRESET_LEFT_WIDE)
+	_task_panel.offset_left = 0
+	_task_panel.offset_top = 92
+	_task_panel.offset_right = 352
+	_task_panel.offset_bottom = -78
 	_task_panel.task_details_requested.connect(_show_task_details)
 	_task_panel.tracking_toggled.connect(MockData.toggle_task_tracking)
-	_task_panel.demo_advance_requested.connect(MockData.advance_demo_task)
-	workspace.add_child(_task_panel)
+	parent.add_child(_task_panel)
 
-	var map_frame := PanelContainer.new()
-	map_frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	map_frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	workspace.add_child(map_frame)
-	var map_area := MAP_AREA_SCENE.instantiate()
-	map_frame.add_child(map_area)
 
-	var secondary := VBoxContainer.new()
-	secondary.custom_minimum_size.x = 180
-	UIBuilder.set_box_spacing(secondary, 8)
-	workspace.add_child(secondary)
-	secondary.add_child(UIBuilder.make_label("全局事务", 19, UIBuilder.COLOR_ACCENT))
-	_add_route_button(secondary, "全服事件", "world_event")
-	_add_route_button(secondary, "赛季结算", "season")
-	_add_route_button(secondary, "NPC 对话", "npc")
-	_add_route_button(secondary, "流亡", "exile")
-	_add_route_button(secondary, "复兴", "revival")
-	_add_route_button(secondary, "反攻", "counterattack")
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	secondary.add_child(spacer)
-	_add_route_button(secondary, "UI 演示", "ui_demo")
-	_add_route_button(secondary, "设置", "settings")
-
+func _build_bottom_navigation(parent: Control) -> void:
+	var nav_panel := PanelContainer.new()
+	nav_panel.name = "BottomNavigation"
+	nav_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	nav_panel.offset_top = -68
+	parent.add_child(nav_panel)
 	var nav := HBoxContainer.new()
 	nav.alignment = BoxContainer.ALIGNMENT_CENTER
-	UIBuilder.set_box_spacing(nav, 12)
-	root_box.add_child(nav)
-	_add_route_button(nav, "城池经营", "city", true)
-	_add_route_button(nav, "武将", "generals", true)
-	_add_route_button(nav, "联盟", "alliance", true)
-	_add_route_button(nav, "战前路线", "route", true)
-	_add_route_button(nav, "战斗指令", "battle", true)
-
-	_build_status_panel()
-
-
-func _add_route_button(parent: BoxContainer, label: String, route: String, expand: bool = false) -> void:
-	var button := UIBuilder.make_button(label, 0)
-	button.custom_minimum_size.y = 52
-	if expand:
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	button.pressed.connect(func() -> void: NavigationManager.open_screen(route))
-	parent.add_child(button)
+	UIBuilder.set_box_spacing(nav, 8)
+	nav_panel.add_child(nav)
+	for route_data in PRIMARY_ROUTES:
+		_add_route_button(nav, str(route_data.label), str(route_data.route), true)
+	var more_button := UIBuilder.make_button("更多", 96)
+	more_button.custom_minimum_size.y = 56
+	more_button.pressed.connect(_toggle_more_panel)
+	nav.add_child(more_button)
 
 
-func _build_status_panel() -> void:
-	_status_panel = UIBuilder.make_panel()
+func _build_status_panel(parent: Control) -> void:
+	_status_panel = UIBuilder.make_panel(18)
+	_status_panel.name = "StatusPanel"
 	_status_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_status_panel.position = Vector2(-470, 110)
-	_status_panel.size = Vector2(440, 390)
+	_status_panel.offset_left = -438
+	_status_panel.offset_top = 92
+	_status_panel.offset_right = -88
+	_status_panel.offset_bottom = 448
 	_status_panel.visible = false
-	add_child(_status_panel)
+	parent.add_child(_status_panel)
 	var content := VBoxContainer.new()
-	UIBuilder.set_box_spacing(content, 12)
+	UIBuilder.set_box_spacing(content, 10)
 	_status_panel.add_child(content)
 	var header := HBoxContainer.new()
 	content.add_child(header)
-	var title := UIBuilder.make_label("更多状态", 24, UIBuilder.COLOR_ACCENT)
+	var title := UIBuilder.make_label("军府状态", 22, UIBuilder.COLOR_ACCENT)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
-	var close := UIBuilder.make_button("关闭", 96)
-	close.custom_minimum_size.y = 46
+	var close := UIBuilder.make_button("关闭", 82)
+	close.text = "×"
+	close.tooltip_text = "关闭状态面板"
+	close.custom_minimum_size.x = 56
+	close.custom_minimum_size.y = 56
 	close.pressed.connect(_toggle_status_panel)
 	header.add_child(close)
 	_status_grid = GridContainer.new()
 	_status_grid.columns = 2
 	_status_grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_status_grid.add_theme_constant_override("h_separation", 26)
-	_status_grid.add_theme_constant_override("v_separation", 14)
+	_status_grid.add_theme_constant_override("h_separation", 24)
+	_status_grid.add_theme_constant_override("v_separation", 12)
 	content.add_child(_status_grid)
+
+
+func _build_more_panel(parent: Control) -> void:
+	_more_panel = UIBuilder.make_panel(14)
+	_more_panel.name = "MoreMenu"
+	_more_panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_more_panel.offset_left = -452
+	_more_panel.offset_top = -330
+	_more_panel.offset_right = -10
+	_more_panel.offset_bottom = -78
+	_more_panel.visible = false
+	parent.add_child(_more_panel)
+	var content := VBoxContainer.new()
+	UIBuilder.set_box_spacing(content, 8)
+	_more_panel.add_child(content)
+	var title := UIBuilder.make_label("其他事务", 20, UIBuilder.COLOR_ACCENT)
+	content.add_child(title)
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("v_separation", 6)
+	content.add_child(grid)
+	for route_data in MORE_ROUTES:
+		_add_route_button(grid, str(route_data.label), str(route_data.route), true)
+
+
+func _build_selection_panel(parent: Control) -> void:
+	_selection_panel = UIBuilder.make_panel(16)
+	_selection_panel.name = "SelectionDrawer"
+	_selection_panel.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_selection_panel.offset_left = -390
+	_selection_panel.offset_top = -176
+	_selection_panel.offset_right = 390
+	_selection_panel.offset_bottom = -78
+	_selection_panel.visible = false
+	parent.add_child(_selection_panel)
+	var row := HBoxContainer.new()
+	UIBuilder.set_box_spacing(row, 14)
+	_selection_panel.add_child(row)
+	var text_box := VBoxContainer.new()
+	text_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	UIBuilder.set_box_spacing(text_box, 4)
+	row.add_child(text_box)
+	_selection_title = UIBuilder.make_label("已选目标", 21, UIBuilder.COLOR_ACCENT)
+	text_box.add_child(_selection_title)
+	_selection_details = UIBuilder.make_label("", 16, UIBuilder.COLOR_MUTED, true)
+	text_box.add_child(_selection_details)
+	_selection_action = UIBuilder.make_primary_button("城池经营", 126)
+	_selection_action.name = "SelectionAction"
+	_selection_action.visible = false
+	_selection_action.pressed.connect(func() -> void: NavigationManager.open_screen("city", _current_selection))
+	row.add_child(_selection_action)
+	var close := UIBuilder.make_button("关闭", 82)
+	close.text = "×"
+	close.tooltip_text = "关闭选择详情"
+	close.custom_minimum_size.x = 56
+	close.pressed.connect(_clear_map_selection)
+	row.add_child(close)
+
+
+func _add_route_button(parent: Container, label: String, route: String, expand: bool = false) -> void:
+	var button := UIBuilder.make_button(label, 0)
+	button.custom_minimum_size.y = 56
+	if expand:
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.pressed.connect(_open_route.bind(route))
+	parent.add_child(button)
+
+
+func _open_route(route: String) -> void:
+	_more_panel.visible = false
+	NavigationManager.open_screen(route)
+
+
+func _apply_responsive_layout() -> void:
+	if _task_panel == null:
+		return
+	var window_width := float(DisplayServer.window_get_size().x)
+	var wide_layout := window_width >= WIDE_LAYOUT_MIN_WIDTH
+	_task_panel.visible = wide_layout or _task_drawer_requested
+	_task_toggle.visible = not wide_layout
+	if _selection_panel != null:
+		var available_width := maxf(320.0, get_viewport_rect().size.x - 72.0)
+		var drawer_width := minf(780.0, available_width)
+		_selection_panel.offset_left = -drawer_width * 0.5
+		_selection_panel.offset_right = drawer_width * 0.5
+
+
+func _toggle_task_drawer() -> void:
+	_task_drawer_requested = not _task_drawer_requested
+	_task_panel.visible = _task_drawer_requested
 
 
 func _toggle_status_panel() -> void:
 	_status_panel.visible = not _status_panel.visible
+	_more_panel.visible = false
 	if _status_panel.visible:
 		_refresh_status_panel()
 
 
+func _toggle_more_panel() -> void:
+	_more_panel.visible = not _more_panel.visible
+	_status_panel.visible = false
+
+
 func _refresh_all() -> void:
+	_refresh_identity()
 	_resource_bar.set_resources(MockData.get_resources())
 	_task_panel.set_tasks(MockData.get_tasks())
 	_refresh_status_panel()
+
+
+func _refresh_identity() -> void:
+	var server: Dictionary = MockData.get_selected_server()
+	_identity_label.text = "%s\n%s · %s" % [
+		MockData.get_identity(),
+		server.get("name", "未选服务器"),
+		server.get("status", "未知"),
+	]
 
 
 func _refresh_status_panel() -> void:
@@ -145,9 +308,8 @@ func _refresh_status_panel() -> void:
 		child.queue_free()
 	var statuses: Dictionary = MockData.get_statuses()
 	for status_name in statuses:
-		var value: String = str(statuses[status_name])
-		_status_grid.add_child(UIBuilder.make_label(str(status_name), 17, UIBuilder.COLOR_MUTED))
-		var value_label := UIBuilder.make_label(value, 18, UIBuilder.COLOR_TEXT)
+		_status_grid.add_child(UIBuilder.make_label(str(status_name), 16, UIBuilder.COLOR_MUTED))
+		var value_label := UIBuilder.make_label(str(statuses[status_name]), 17, UIBuilder.COLOR_TEXT)
 		value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		_status_grid.add_child(value_label)
 
@@ -157,6 +319,8 @@ func _connect_mock_signals() -> void:
 		MockData.resources_changed.connect(_on_resources_changed)
 	if not MockData.tasks_changed.is_connected(_on_tasks_changed):
 		MockData.tasks_changed.connect(_on_tasks_changed)
+	if not MockData.selected_server_changed.is_connected(_on_selected_server_changed):
+		MockData.selected_server_changed.connect(_on_selected_server_changed)
 
 
 func _on_resources_changed(resources: Dictionary, changes: Dictionary) -> void:
@@ -166,6 +330,45 @@ func _on_resources_changed(resources: Dictionary, changes: Dictionary) -> void:
 
 func _on_tasks_changed(tasks: Array[Dictionary]) -> void:
 	_task_panel.set_tasks(tasks)
+
+
+func _on_selected_server_changed(_server: Dictionary) -> void:
+	_refresh_identity()
+
+
+func _on_map_selection_changed(selection: Dictionary) -> void:
+	_current_selection = selection.duplicate(true)
+	var tile_id: Vector2i = selection.get("tile_id", Vector2i.ZERO)
+	if str(selection.get("kind", "")) == "city":
+		_selection_title.text = "%s  Lv.%d" % [selection.get("name", "未命名城池"), int(selection.get("level", 1))]
+		_selection_details.text = "阵营：%s    坐标：%d, %d" % [selection.get("faction", "中立"), tile_id.x, tile_id.y]
+		_selection_action.visible = true
+	else:
+		_selection_title.text = "%s格  %d, %d" % [selection.get("terrain", "未知"), tile_id.x, tile_id.y]
+		_selection_details.text = "高度 %.1f    道路：%s    可建城：%s" % [
+			float(selection.get("height", 0.0)),
+			"有" if bool(selection.get("has_road", false)) else "无",
+			"是" if bool(selection.get("can_build_city", false)) else "否",
+		]
+		_selection_action.visible = false
+	_selection_panel.visible = true
+
+
+func _on_map_selection_cleared() -> void:
+	_current_selection.clear()
+	_selection_panel.visible = false
+
+
+func _clear_map_selection() -> void:
+	var map_world := _map_area.get_map_world()
+	if map_world != null:
+		map_world.clear_selection()
+	else:
+		_on_map_selection_cleared()
+
+
+func _on_map_load_failed(message: String) -> void:
+	NavigationManager.show_message("地图暂不可用", "%s\n\n其他军府功能仍可继续使用。" % message)
 
 
 func _show_task_details(task: Dictionary) -> void:

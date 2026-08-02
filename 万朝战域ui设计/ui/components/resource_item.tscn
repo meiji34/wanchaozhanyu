@@ -3,6 +3,5 @@
 [ext_resource type="Script" path="res://ui/components/resource_item.gd" id="1"]
 
 [node name="ResourceItem" type="PanelContainer"]
-custom_minimum_size = Vector2(150, 64)
+custom_minimum_size = Vector2(92, 54)
 script = ExtResource("1")
-

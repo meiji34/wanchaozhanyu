@@ -2,6 +2,5 @@
 
 [ext_resource type="Script" path="res://ui/components/resource_bar.gd" id="1"]
 
-[node name="ResourceBar" type="PanelContainer"]
+[node name="ResourceBar" type="MarginContainer"]
 script = ExtResource("1")
-

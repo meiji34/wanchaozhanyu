@@ -1,0 +1,22 @@
+{
+  "project": "rts_city",
+  "purpose": "3D modeling reference",
+  "palette": "Three Kingdoms Fortress 48",
+  "format": "indexed PNG with binary alpha",
+  "master_sheet": {
+    "file": "rts_city_multiview.png",
+    "size": [1536, 1024],
+    "layout": [3, 2],
+    "cell_size": [512, 512]
+  },
+  "views": [
+    {"name": "front", "file": "views/rts_city_view_front.png"},
+    {"name": "right", "file": "views/rts_city_view_right.png"},
+    {"name": "rear", "file": "views/rts_city_view_rear.png"},
+    {"name": "left", "file": "views/rts_city_view_left.png"},
+    {"name": "top", "file": "views/rts_city_view_top.png"},
+    {"name": "isometric", "file": "views/rts_city_view_isometric.png"}
+  ],
+  "reference": "rts_city_original.png",
+  "target": "Godot 4.7.1 / 3D modeling reference"
+}

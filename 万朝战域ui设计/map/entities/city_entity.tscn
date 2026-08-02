@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://map/entities/city_entity.gd" id="1_city"]
+
+[node name="CityEntity" type="Node3D"]
+script = ExtResource("1_city")

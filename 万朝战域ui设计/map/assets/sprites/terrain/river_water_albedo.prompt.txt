@@ -1,0 +1,18 @@
+用途：Godot 4.7 移动端 RTS/SLG 地图的无缝河流水面纹理
+生成方式：内置 image_gen
+视觉参考：
+- res://map/assets/models/rts_city_hy3d31_texture_pbr_20250901.png
+- 本次生成的 grass_albedo.png
+
+Use case: stylized-concept
+Asset type: seamless animated river-surface albedo texture for a Godot 4.7 mobile RTS/SLG map
+Input images: use the supplied Chinese ancient city albedo and generated grass texture only as palette, fidelity, and scale references; do not edit or composite them
+Primary request: create one square, genuinely seamless, edge-to-edge tileable shallow river water texture for a 2.5D overhead ancient Chinese Three Kingdoms strategy map
+Style/medium: clean HD hand-painted game terrain with restrained realistic surface detail, readable from an orthographic 35–80 degree camera and compatible with the muted grass and city materials
+Color palette: deep desaturated teal, blue-green, muted jade, subtle dark cyan; keep enough contrast from the olive grass
+Surface detail: soft elongated current streaks generally flowing left-to-right, gentle ripples, sparse subdued pale highlights, small-scale variation suitable for shader scrolling; no large focal wave
+Lighting: neutral mostly-flat albedo, no directional sunlight, no baked cast shadows, no transparency
+Composition: uniform full-frame water surface; all four edges must connect seamlessly; no border or vignette
+Constraints: water surface only; no river banks, sand, mud shore, rocks, reeds, lotus, fish, boats, bridges, buildings, units, foam border, waterfalls, text, labels, grid lines, tile outlines, horizon, watermark; no large isolated motif; not pixel art
+
+后处理：缩放到 1024×1024，并通过镜像拼接后的中心裁切保证四边像素连续。
