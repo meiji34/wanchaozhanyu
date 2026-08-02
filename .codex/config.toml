@@ -1,0 +1,15 @@
+[mcp_servers.godot]
+command = "npx"
+args = ["-y", "@coding-solo/godot-mcp@0.1.1"]
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+
+[mcp_servers.blender]
+command = "uvx"
+args = ["--python", "3.11", "--from", "git+https://github.com/ahujasid/blender-mcp.git@e3ece087adecce4242d4dc3e4db28c33010b51c4", "blender-mcp"]
+startup_timeout_sec = 60
+tool_timeout_sec = 180
+
+[mcp_servers.blender.env]
+DISABLE_TELEMETRY = "true"
+UV_PYTHON_PREFERENCE = "only-managed"

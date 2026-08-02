@@ -9,19 +9,21 @@ var _configured: bool = false
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(150, 64)
-	var row := HBoxContainer.new()
-	UIBuilder.set_box_spacing(row, 8)
-	add_child(row)
+	custom_minimum_size = Vector2(92, 54)
+	var content := VBoxContainer.new()
+	UIBuilder.set_box_spacing(content, 2)
+	add_child(content)
 	_name_label = UIBuilder.make_label("资源", 15, UIBuilder.COLOR_MUTED)
-	_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(_name_label)
+	content.add_child(_name_label)
+	var value_row := HBoxContainer.new()
+	UIBuilder.set_box_spacing(value_row, 4)
+	content.add_child(value_row)
 	_value_label = UIBuilder.make_label("0", 20, UIBuilder.COLOR_TEXT)
-	_value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	row.add_child(_value_label)
+	_value_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	value_row.add_child(_value_label)
 	_delta_label = UIBuilder.make_label("", 14, UIBuilder.COLOR_SUCCESS)
 	_delta_label.visible = false
-	row.add_child(_delta_label)
+	value_row.add_child(_delta_label)
 
 
 func configure(resource_name: String, value: int) -> void:

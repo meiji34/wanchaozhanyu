@@ -42,6 +42,16 @@ func focus_world_position(world_position: Vector3, viewport_size: Vector2 = Vect
 	_apply_camera_transform()
 
 
+func reset_view(viewport_size: Vector2 = Vector2(960.0, 540.0)) -> void:
+	_last_viewport_size = viewport_size
+	target_position = Vector3.ZERO
+	ortho_size = DEFAULT_ORTHO_SIZE
+	yaw_radians = 0.0
+	pitch_degrees = DEFAULT_PITCH_DEGREES
+	_clamp_target(viewport_size)
+	_apply_camera_transform()
+
+
 func pan_by_screen_delta(delta: Vector2, viewport_size: Vector2) -> void:
 	if viewport_size.y <= 0.0:
 		return

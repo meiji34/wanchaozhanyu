@@ -40,6 +40,7 @@ func _build_ui() -> void:
 	header.add_child(balance)
 
 	_resource_bar = RESOURCE_BAR_SCENE.instantiate() as ResourceBar
+	_resource_bar.show_demo_controls = true
 	_resource_bar.demo_update_requested.connect(_demo_resources)
 	_resource_bar.more_status_requested.connect(func() -> void: NavigationManager.show_message("组件状态", "更多状态面板已在 HUD 中实现。"))
 	root_box.add_child(_resource_bar)
@@ -49,6 +50,7 @@ func _build_ui() -> void:
 	UIBuilder.set_box_spacing(columns, 14)
 	root_box.add_child(columns)
 	_task_panel = TASK_PANEL_SCENE.instantiate() as TaskPanel
+	_task_panel.show_demo_controls = true
 	_task_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_task_panel.tracking_toggled.connect(_toggle_tracking)
 	_task_panel.demo_advance_requested.connect(_advance_task)
@@ -106,4 +108,3 @@ func _demo_loading() -> void:
 	NavigationManager.show_loading_overlay("正在验证加载遮罩…")
 	await get_tree().create_timer(0.9).timeout
 	NavigationManager.hide_loading_overlay()
-

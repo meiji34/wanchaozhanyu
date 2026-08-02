@@ -36,6 +36,45 @@ func handle_map_input(
 	return map_input_controller.handle_input(event, source_size, viewport_size)
 
 
+func get_city_snapshot(city_id: String) -> Dictionary:
+	var city := map_controller.get_city_by_id(city_id)
+	if city == null:
+		return {}
+	return {
+		"kind": "city",
+		"id": city.city_id,
+		"tile_id": city.grid_position,
+		"name": city.display_name,
+		"level": city.level,
+		"faction": city.faction_placeholder,
+	}
+
+
+func get_tile_snapshot(tile_id: Vector2i) -> Dictionary:
+	if map_controller.map_data == null:
+		return {}
+	var tile := map_controller.map_data.get_tile(tile_id)
+	if tile == null:
+		return {}
+	return {
+		"kind": "tile",
+		"tile_id": tile.grid_position,
+		"terrain": MapTileTypes.get_display_name(tile.terrain_type),
+		"height": tile.height,
+		"has_road": tile.has_road,
+		"can_build_city": tile.can_build_city,
+	}
+
+
+func zoom_by_factor(factor: float, viewport_size: Vector2) -> void:
+	camera_rig.zoom_by_factor(factor, viewport_size)
+
+
+func reset_view(viewport_size: Vector2) -> void:
+	camera_rig.reset_view(viewport_size)
+	clear_selection()
+
+
 func select_at_viewport_position(viewport_position: Vector2) -> void:
 	if map_controller.map_data == null:
 		return

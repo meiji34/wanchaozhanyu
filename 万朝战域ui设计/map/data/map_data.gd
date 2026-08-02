@@ -4,6 +4,7 @@ extends RefCounted
 var map_size: Vector2i
 var chunk_size: Vector2i
 var cell_size: float
+@warning_ignore("shadowed_global_identifier")
 var seed: int
 var tiles: Dictionary = {}
 var cities: Array[MapCityData] = []
@@ -25,7 +26,10 @@ func _init(
 
 
 func get_min_grid() -> Vector2i:
-	return Vector2i(-map_size.x / 2, -map_size.y / 2)
+	return Vector2i(
+		-floori(float(map_size.x) / 2.0),
+		-floori(float(map_size.y) / 2.0)
+	)
 
 
 func get_max_grid() -> Vector2i:

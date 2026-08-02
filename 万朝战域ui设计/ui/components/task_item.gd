@@ -49,11 +49,11 @@ func _build_ui() -> void:
 	UIBuilder.set_box_spacing(actions, 8)
 	_details.add_child(actions)
 	var details_button := UIBuilder.make_button("查看详情", 118)
-	details_button.custom_minimum_size.y = 48
+	details_button.custom_minimum_size.y = 56
 	details_button.pressed.connect(func() -> void: details_requested.emit(_task.duplicate(true)))
 	actions.add_child(details_button)
 	_track_button = UIBuilder.make_button("追踪", 100)
-	_track_button.custom_minimum_size.y = 48
+	_track_button.custom_minimum_size.y = 56
 	_track_button.pressed.connect(func() -> void: tracking_toggled.emit(str(_task.get("id", ""))))
 	actions.add_child(_track_button)
 
@@ -80,4 +80,3 @@ func _refresh() -> void:
 func _toggle_expanded() -> void:
 	_expanded = not _expanded
 	_refresh()
-

@@ -5,6 +5,8 @@ signal task_details_requested(task: Dictionary)
 signal tracking_toggled(task_id: String)
 signal demo_advance_requested
 
+@export var show_demo_controls := false
+
 const TASK_ITEM_SCENE := preload("res://ui/components/task_item.tscn")
 
 var _list: VBoxContainer
@@ -12,7 +14,7 @@ var _empty_label: Label
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(360, 0)
+	custom_minimum_size = Vector2(328, 0)
 	var content := VBoxContainer.new()
 	UIBuilder.set_box_spacing(content, 12)
 	add_child(content)
@@ -21,10 +23,11 @@ func _ready() -> void:
 	var title := UIBuilder.make_label("任务与事件", 22, UIBuilder.COLOR_ACCENT)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
-	var demo := UIBuilder.make_button("推进演示", 112)
-	demo.custom_minimum_size.y = 48
-	demo.pressed.connect(func() -> void: demo_advance_requested.emit())
-	header.add_child(demo)
+	if show_demo_controls:
+		var demo := UIBuilder.make_button("推进演示", 112)
+		demo.custom_minimum_size.y = 56
+		demo.pressed.connect(func() -> void: demo_advance_requested.emit())
+		header.add_child(demo)
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -49,4 +52,3 @@ func set_tasks(tasks: Array[Dictionary]) -> void:
 		item.configure(task)
 		item.details_requested.connect(func(data: Dictionary) -> void: task_details_requested.emit(data))
 		item.tracking_toggled.connect(func(task_id: String) -> void: tracking_toggled.emit(task_id))
-

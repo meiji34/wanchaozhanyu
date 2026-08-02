@@ -1,26 +1,26 @@
 class_name UIBuilder
 extends RefCounted
 
-const COLOR_TEXT := Color("f3ebdd")
-const COLOR_MUTED := Color("bdb3a5")
-const COLOR_ACCENT := Color("d09b43")
-const COLOR_SUCCESS := Color("68a67a")
-const COLOR_WARNING := Color("c99145")
-const COLOR_ERROR := Color("d06458")
-const COLOR_INFO := Color("6e91ad")
+const COLOR_TEXT := Color("eee9df")
+const COLOR_MUTED := Color("aaa99f")
+const COLOR_ACCENT := Color("c99648")
+const COLOR_SUCCESS := Color("6f9d82")
+const COLOR_WARNING := Color("c58d45")
+const COLOR_ERROR := Color("bf6259")
+const COLOR_INFO := Color("6f908d")
 
 
 static func make_label(
 	text_value: String,
 	font_size: int = 18,
 	color: Color = COLOR_TEXT,
-	wrap: bool = false
+	should_wrap: bool = false
 ) -> Label:
 	var label := Label.new()
 	label.text = text_value
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", color)
-	if wrap:
+	if should_wrap:
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return label
 

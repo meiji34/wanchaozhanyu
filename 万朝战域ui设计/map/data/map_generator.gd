@@ -73,9 +73,9 @@ static func _choose_terrain(
 	grid_position: Vector2i,
 	terrain_noise: float,
 	detail_noise: float,
-	seed: int
+	generation_seed: int
 ) -> int:
-	var phase := float(seed % 97) * 0.01
+	var phase := float(generation_seed % 97) * 0.01
 	var river_center := roundi(
 		sin(float(grid_position.x) * 0.046 + phase) * 13.0
 		+ sin(float(grid_position.x) * 0.109 - phase) * 4.0

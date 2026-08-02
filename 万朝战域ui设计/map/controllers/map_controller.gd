@@ -62,6 +62,15 @@ func get_city_at_grid(grid_position: Vector2i) -> MapCityData:
 	return map_data.get_city_at_grid(grid_position) if map_data != null else null
 
 
+func get_city_by_id(city_id: String) -> MapCityData:
+	if map_data == null:
+		return null
+	for city in map_data.cities:
+		if city.city_id == city_id:
+			return city
+	return null
+
+
 func set_selected_city(city_id: String) -> void:
 	for key in _city_entities:
 		var entity := _city_entities[key] as MapCityEntity
