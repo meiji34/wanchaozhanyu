@@ -30,3 +30,5 @@ script = ExtResource("4_ck761")
 
 [node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=999031442]
 script = ExtResource("5_8nlcl")
+
+; 格子视觉化：通过 grass_ground.gdshader 中的 grid_line_enabled 控制格子线显示

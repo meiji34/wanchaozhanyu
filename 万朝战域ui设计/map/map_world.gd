@@ -210,6 +210,18 @@ func set_debug_enabled(enabled: bool) -> void:
 	debug_overlay.set_debug_enabled(enabled)
 
 
+## ——— 格子视觉控制 ———
+
+## 切换格子视觉线显示。无需重建 Chunk，立即更新所有已缓存地面材质。
+func set_grid_visual_enabled(enabled: bool) -> void:
+	MapChunk.set_grid_visual_enabled(enabled)
+
+
+## 获取格子视觉线当前开关状态
+func is_grid_visual_enabled() -> bool:
+	return MapChunk.grid_visual_enabled
+
+
 func get_debug_snapshot() -> Dictionary:
 	var snapshot := map_controller.get_debug_snapshot()
 	snapshot["camera"] = camera_rig.get_debug_data()

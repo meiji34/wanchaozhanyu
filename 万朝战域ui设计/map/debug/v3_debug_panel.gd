@@ -33,6 +33,7 @@ var _stats_label: Label
 
 # 地图调试控件
 var _fog_toggle: Button
+var _grid_visual_toggle: Button
 var _initial_radius_slider: HSlider
 var _initial_radius_label: Label
 var _vision_radius_slider: HSlider
@@ -209,6 +210,12 @@ func _build_ui() -> void:
 
 	_map_vbox.add_child(_mk_section("相机"))
 	_map_vbox.add_child(_mk_btn_row([["经营3D","_on_switch_management"],["战争2.5D","_on_switch_battle"]]))
+
+	# 地形视觉
+	_map_vbox.add_child(_mk_section("地形视觉"))
+	_grid_visual_toggle = _mk_toggle("格子线")
+	_grid_visual_toggle.pressed.connect(_on_grid_visual_toggle)
+	_map_vbox.add_child(_grid_visual_toggle)
 
 	# 统计
 	_stats_label = _mk_label("", 11)
@@ -400,6 +407,9 @@ func _refresh_button_states() -> void:
 	if _controller == null: return
 	_fog_toggle.button_pressed = _controller.fog_enabled
 	_fog_toggle.text = "迷雾: " + ("开" if _controller.fog_enabled else "关")
+	if _map_world != null and _grid_visual_toggle != null:
+		_grid_visual_toggle.button_pressed = _map_world.is_grid_visual_enabled()
+		_grid_visual_toggle.text = "格子线: " + ("开" if _map_world.is_grid_visual_enabled() else "关")
 
 
 func _on_collapse_toggle() -> void:
@@ -422,6 +432,10 @@ func _on_fog_toggle() -> void:
 	if _controller == null: return
 	_controller.set_fog_enabled(_fog_toggle.button_pressed)
 	_fog_toggle.text = "迷雾: " + ("开" if _controller.fog_enabled else "关")
+func _on_grid_visual_toggle() -> void:
+	if _map_world == null: return
+	_map_world.set_grid_visual_enabled(_grid_visual_toggle.button_pressed)
+	_grid_visual_toggle.text = "格子线: " + ("开" if _map_world.is_grid_visual_enabled() else "关")
 func _on_ir_changed(v: float) -> void:
 	_initial_radius_label.text = "开局视野半径:%d" % int(v)
 	if _controller: _controller.debug_initial_reveal_radius = int(v)

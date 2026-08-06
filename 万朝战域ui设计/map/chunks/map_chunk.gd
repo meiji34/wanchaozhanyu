@@ -66,6 +66,21 @@ const MATERIAL_CONFIGS := {
 
 static var _material_cache: Dictionary = {}
 
+## 格子视觉线开关（默认开启）。切换后立即更新所有已缓存地面材质，无需重建 Chunk。
+static var grid_visual_enabled: bool = true
+
+
+## 切换格子视觉线显示。遍历所有已缓存地面 ShaderMaterial，设置 grid_line_enabled 参数。
+## 对未加载的 Chunk，下次加载时自动从该静态变量读取当前状态。
+static func set_grid_visual_enabled(enabled: bool) -> void:
+	grid_visual_enabled = enabled
+	for material_key in _material_cache:
+		var material := _material_cache[material_key] as Material
+		if material is ShaderMaterial:
+			(material as ShaderMaterial).set_shader_parameter(
+				&"grid_line_enabled", enabled
+			)
+
 enum ChunkRuntimeState {
 	UNLOADED = 0,   ## 未加载
 	PRELOADED = 1,  ## 后台就绪，不显示、不碰撞、不接收输入
@@ -280,7 +295,13 @@ func _load_optional_material(
 	if ResourceLoader.exists(resource_path, "Material"):
 		var resource := load(resource_path)
 		if resource is Material:
-			return resource as Material
+			var material := resource as Material
+			# 加载后同步当前格子视觉开关状态，确保未加载 Chunk 也遵守设置
+			if material is ShaderMaterial:
+				(material as ShaderMaterial).set_shader_parameter(
+					&"grid_line_enabled", grid_visual_enabled
+				)
+			return material
 	push_warning("%s不可用，回退到纯色占位材质：%s" % [display_name, resource_path])
 	return _create_unshaded_material(fallback_color)
 
