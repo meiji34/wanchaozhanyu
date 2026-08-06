@@ -321,41 +321,77 @@ func _build_fog_overlay(bounds: Rect2i) -> void:
 	if map_data == null or map_data.fog_data == null:
 		return
 	var fog := map_data.fog_data
-	var vertex_width := bounds.size.x + 1
-	var vertex_count := vertex_width * (bounds.size.y + 1)
 	var vertices := PackedVector3Array()
 	var colors := PackedColorArray()
-	vertices.resize(vertex_count)
-	colors.resize(vertex_count)
-	var has_any_fog := false
-	for local_y in range(bounds.size.y + 1):
-		for local_x in range(bounds.size.x + 1):
-			var index := local_y * vertex_width + local_x
-			var vertex_grid := bounds.position + Vector2i(local_x, local_y)
-			var height := map_data.get_height_sample(vertex_grid) + FOG_HEIGHT_OFFSET
-			vertices[index] = Vector3(
-				float(local_x) * map_data.cell_size,
-				height,
-				float(local_y) * map_data.cell_size
-			)
-			# 取相邻四格状态中最隐蔽的一个作为顶点色
-			var fog_color := _sample_fog_color(fog, bounds.position + Vector2i(local_x, local_y))
-			colors[index] = fog_color
-			if fog_color.a > 0.01:
-				has_any_fog = true
-	if not has_any_fog:
-		return
 	var normals := PackedVector3Array()
-	normals.resize(vertex_count)
-	normals.fill(Vector3.UP)
 	var indices := PackedInt32Array()
+	var has_any_fog := false
+	var cs := map_data.cell_size
+
+	# 阶梯迷雾：每格顶部 + 侧面，雾色由格子自身状态决定
 	for local_y in range(bounds.size.y):
 		for local_x in range(bounds.size.x):
-			var base := local_y * vertex_width + local_x
+			var grid_position := bounds.position + Vector2i(local_x, local_y)
+			if not map_data.is_valid_grid(grid_position):
+				continue
+			var surface_height := map_data.get_surface_height_at_grid(grid_position)
+			var fog_color := _get_cell_fog_color(fog, grid_position)
+			if fog_color.a > 0.01:
+				has_any_fog = true
+
+			# 顶部四边形
+			var base := vertices.size()
+			for corner in TerrainMeshBuilder.QUAD_CORNERS:
+				vertices.append(Vector3(
+					(float(local_x) + float(corner.x)) * cs,
+					surface_height + FOG_HEIGHT_OFFSET,
+					(float(local_y) + float(corner.y)) * cs
+				))
+				colors.append(fog_color)
+				normals.append(Vector3.UP)
 			indices.append_array(PackedInt32Array([
-				base, base + vertex_width, base + 1,
-				base + 1, base + vertex_width, base + vertex_width + 1,
+				base, base + 1, base + 2,
+				base + 2, base + 1, base + 3,
 			]))
+
+			# 侧面（仅当当前格子高于邻居时生成，使用当前格子雾色）
+			for dir_info in TerrainMeshBuilder.SIDE_DIRECTIONS:
+				var neighbor_grid: Vector2i = grid_position + dir_info.offset
+				if not map_data.is_valid_grid(neighbor_grid):
+					continue
+				var neighbor_height := map_data.get_surface_height_at_grid(neighbor_grid)
+				if surface_height <= neighbor_height:
+					continue
+				var ca: Vector2i = dir_info.corner_a
+				var cb: Vector2i = dir_info.corner_b
+				var side_base := vertices.size()
+				vertices.append(Vector3(
+					(float(local_x) + float(ca.x)) * cs,
+					surface_height + FOG_HEIGHT_OFFSET,
+					(float(local_y) + float(ca.y)) * cs))
+				vertices.append(Vector3(
+					(float(local_x) + float(cb.x)) * cs,
+					surface_height + FOG_HEIGHT_OFFSET,
+					(float(local_y) + float(cb.y)) * cs))
+				vertices.append(Vector3(
+					(float(local_x) + float(ca.x)) * cs,
+					neighbor_height + FOG_HEIGHT_OFFSET,
+					(float(local_y) + float(ca.y)) * cs))
+				vertices.append(Vector3(
+					(float(local_x) + float(cb.x)) * cs,
+					neighbor_height + FOG_HEIGHT_OFFSET,
+					(float(local_y) + float(cb.y)) * cs))
+				var normal: Vector3 = dir_info.normal
+				for _i in range(4):
+					colors.append(fog_color)
+					normals.append(normal)
+				indices.append_array(PackedInt32Array([
+					side_base, side_base + 1, side_base + 2,
+					side_base + 2, side_base + 1, side_base + 3,
+				]))
+
+	if not has_any_fog:
+		return
 	var mesh := ArrayMesh.new()
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
@@ -397,18 +433,10 @@ func rebuild_fog() -> void:
 		_build_fog_overlay(bounds)
 
 
-func _sample_fog_color(fog: FogData, vertex_grid: Vector2i) -> Color:
-	## 只有 UNKNOWN 格子显示迷雾；EXPLORED 和 VISIBLE 均为透明。
-	## 使用当前 chunk 的 fog_faction_id 以正确显示对应阵营的探索状态
-	var corners: Array[Vector2i] = [
-		vertex_grid,
-		vertex_grid + Vector2i.LEFT,
-		vertex_grid + Vector2i.UP,
-		vertex_grid + Vector2i(-1, -1),
-	]
-	for corner in corners:
-		if fog.is_unknown(corner, fog_faction_id):
-			return FOG_UNKNOWN_COLOR
+func _get_cell_fog_color(fog: FogData, grid_position: Vector2i) -> Color:
+	## 阶梯迷雾：直接返回格子自身的迷雾状态颜色
+	if fog.is_unknown(grid_position, fog_faction_id):
+		return FOG_UNKNOWN_COLOR
 	return FOG_VISIBLE_COLOR
 
 
@@ -420,12 +448,12 @@ func _build_lod2_proxy(bounds: Rect2i) -> void:
 		return
 	var cell_w := float(bounds.size.x) * map_data.cell_size
 	var cell_h := float(bounds.size.y) * map_data.cell_size
-	# 使用 Chunk 中心平均高度
+	# 使用 Chunk 中心平均阶梯高度
 	var sum_height := 0.0
 	var count := 0
-	for local_y in range(bounds.size.y + 1):
-		for local_x in range(bounds.size.x + 1):
-			sum_height += map_data.get_height_sample(bounds.position + Vector2i(local_x, local_y))
+	for local_y in range(bounds.size.y):
+		for local_x in range(bounds.size.x):
+			sum_height += map_data.get_surface_height_at_grid(bounds.position + Vector2i(local_x, local_y))
 			count += 1
 	var avg_height := sum_height / float(count) if count > 0 else 0.0
 

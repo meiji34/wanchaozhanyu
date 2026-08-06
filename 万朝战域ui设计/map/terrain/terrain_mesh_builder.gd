@@ -15,27 +15,27 @@ const QUAD_CORNERS: Array[Vector2i] = [
 const ROAD_UV_SCALE := 0.12
 const BRIDGE_UV_SCALE := 0.05
 
+# 阶梯侧面方向配置：偏移量、法线、边缘角点对 (corner_a, corner_b)
+# 角点对顺序确保 cross(edge, down) 产生正确朝外法线
+const SIDE_DIRECTIONS := [
+	{"offset": Vector2i(1, 0), "normal": Vector3(1, 0, 0),
+	 "corner_a": Vector2i(1, 0), "corner_b": Vector2i(1, 1)},   # +X 右
+	{"offset": Vector2i(0, 1), "normal": Vector3(0, 0, 1),
+	 "corner_a": Vector2i(1, 1), "corner_b": Vector2i(0, 1)},   # +Z 下
+	{"offset": Vector2i(-1, 0), "normal": Vector3(-1, 0, 0),
+	 "corner_a": Vector2i(0, 1), "corner_b": Vector2i(0, 0)},   # -X 左
+	{"offset": Vector2i(0, -1), "normal": Vector3(0, 0, -1),
+	 "corner_a": Vector2i(0, 0), "corner_b": Vector2i(1, 0)},   # -Z 上
+]
 
+
+## 构建阶梯地形 Mesh：每个格子顶部为水平面，相邻高度差处生成垂直侧面。
+## 顶面使用按区域分类的材质，侧面复用当前（较高）格子所属材质。
 static func build_ground_mesh(data: DemoMapData, bounds: Rect2i) -> ArrayMesh:
 	var mesh := ArrayMesh.new()
-	var vertex_width := bounds.size.x + 1
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
 	var uvs := PackedVector2Array()
-	vertices.resize(vertex_width * (bounds.size.y + 1))
-	normals.resize(vertices.size())
-	uvs.resize(vertices.size())
-	for local_y in range(bounds.size.y + 1):
-		for local_x in range(bounds.size.x + 1):
-			var index := local_y * vertex_width + local_x
-			var vertex_grid := bounds.position + Vector2i(local_x, local_y)
-			vertices[index] = Vector3(
-				float(local_x) * data.cell_size,
-				data.get_height_sample(vertex_grid),
-				float(local_y) * data.cell_size
-			)
-			normals[index] = data.get_surface_normal_at_vertex(vertex_grid)
-			uvs[index] = Vector2(vertex_grid) * data.cell_size
 
 	var surface_indices := {
 		SURFACE_NEUTRAL: PackedInt32Array(),
@@ -44,17 +44,86 @@ static func build_ground_mesh(data: DemoMapData, bounds: Rect2i) -> ArrayMesh:
 		SURFACE_WETLAND: PackedInt32Array(),
 		SURFACE_CENTRAL: PackedInt32Array(),
 	}
+
 	for local_y in range(bounds.size.y):
 		for local_x in range(bounds.size.x):
 			var grid_position := bounds.position + Vector2i(local_x, local_y)
 			if not data.is_valid_grid(grid_position):
 				continue
+
+			var surface_height := data.get_surface_height_at_grid(grid_position)
 			var surface_key := _get_surface_key(
 				data.get_terrain_type_at(grid_position),
 				data.get_zone_type_at(grid_position)
 			)
 			var indices := surface_indices[surface_key] as PackedInt32Array
-			_append_quad_indices(indices, local_y * vertex_width + local_x, vertex_width)
+
+			# ——— 顶部四边形（水平面）———
+			var base_index := vertices.size()
+			for corner in QUAD_CORNERS:
+				var vertex_grid: Vector2i = grid_position + corner
+				vertices.append(Vector3(
+					(float(local_x) + float(corner.x)) * data.cell_size,
+					surface_height,
+					(float(local_y) + float(corner.y)) * data.cell_size
+				))
+				normals.append(Vector3.UP)
+				uvs.append(Vector2(vertex_grid) * data.cell_size)
+
+			_append_quad_indices(indices, base_index)
+
+			# ——— 垂直侧面（仅在当前格子高于邻居时生成）———
+			for dir_info in SIDE_DIRECTIONS:
+				var neighbor_grid: Vector2i = grid_position + dir_info.offset
+				if not data.is_valid_grid(neighbor_grid):
+					continue
+				var neighbor_height := data.get_surface_height_at_grid(neighbor_grid)
+				if surface_height <= neighbor_height:
+					continue
+
+				var ca: Vector2i = dir_info.corner_a
+				var cb: Vector2i = dir_info.corner_b
+				var side_base := vertices.size()
+
+				# 上边缘（当前格子高度）
+				vertices.append(Vector3(
+					(float(local_x) + float(ca.x)) * data.cell_size,
+					surface_height,
+					(float(local_y) + float(ca.y)) * data.cell_size
+				))
+				vertices.append(Vector3(
+					(float(local_x) + float(cb.x)) * data.cell_size,
+					surface_height,
+					(float(local_y) + float(cb.y)) * data.cell_size
+				))
+				# 下边缘（邻居高度）
+				vertices.append(Vector3(
+					(float(local_x) + float(ca.x)) * data.cell_size,
+					neighbor_height,
+					(float(local_y) + float(ca.y)) * data.cell_size
+				))
+				vertices.append(Vector3(
+					(float(local_x) + float(cb.x)) * data.cell_size,
+					neighbor_height,
+					(float(local_y) + float(cb.y)) * data.cell_size
+				))
+
+				var normal: Vector3 = dir_info.normal
+				for _i in range(4):
+					normals.append(normal)
+				var uv_a := Vector2(grid_position + ca) * data.cell_size
+				var uv_b := Vector2(grid_position + cb) * data.cell_size
+				uvs.append(uv_a)
+				uvs.append(uv_b)
+				uvs.append(uv_a)
+				uvs.append(uv_b)
+
+				# 侧面三角形（法线朝外）
+				indices.append_array(PackedInt32Array([
+					side_base, side_base + 1, side_base + 2,
+					side_base + 2, side_base + 1, side_base + 3,
+				]))
+
 			surface_indices[surface_key] = indices
 
 	for surface_key in surface_indices:
@@ -73,6 +142,7 @@ static func build_ground_mesh(data: DemoMapData, bounds: Rect2i) -> ArrayMesh:
 
 
 static func build_water_mesh(data: DemoMapData, bounds: Rect2i) -> ArrayMesh:
+	# 水域保持原有连续水面表现，不使用阶梯高度
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
 	var indices := PackedInt32Array()
@@ -143,6 +213,8 @@ static func build_road_mesh(
 				if bridge_direction.length_squared() <= 0.0:
 					bridge_direction = Vector2.RIGHT
 			var bridge_right := Vector2(-bridge_direction.y, bridge_direction.x)
+			# 道路使用阶梯量化后的格子顶部高度，保持与阶梯地形一致
+			var road_surface_height := data.get_surface_height_at_grid(grid_position)
 			for corner in QUAD_CORNERS:
 				var vertex_grid: Vector2i = grid_position + corner
 				var height := (
@@ -150,14 +222,14 @@ static func build_road_mesh(
 						0.04 if crossing_type_filter == "ford" else 0.14
 					)
 					if bridges
-					else data.get_height_sample(vertex_grid) + 0.055
+					else road_surface_height + 0.055
 				)
 				vertices.append(Vector3(
 					(float(local_x) + float(corner.x)) * data.cell_size,
 					height,
 					(float(local_y) + float(corner.y)) * data.cell_size
 				))
-				normals.append(Vector3.UP if bridges else data.get_surface_normal_at_vertex(vertex_grid))
+				normals.append(Vector3.UP)
 				var world_xz := Vector2(vertex_grid) * data.cell_size
 				uvs.append(
 					Vector2(
@@ -178,22 +250,48 @@ static func build_road_mesh(
 	return _create_single_surface_mesh(vertices, normals, indices, uvs)
 
 
+## 构建阶梯地形碰撞面：顶部面 + 垂直侧面，与可视 Mesh 几何一致。
 static func build_collision_faces(data: DemoMapData, bounds: Rect2i) -> PackedVector3Array:
 	var faces := PackedVector3Array()
 	for local_y in range(bounds.size.y):
 		for local_x in range(bounds.size.x):
-			var top_left := _get_local_vertex(data, bounds, local_x, local_y)
-			var bottom_left := _get_local_vertex(data, bounds, local_x, local_y + 1)
-			var top_right := _get_local_vertex(data, bounds, local_x + 1, local_y)
-			var bottom_right := _get_local_vertex(data, bounds, local_x + 1, local_y + 1)
-			faces.append_array(PackedVector3Array([
-				top_left,
-				bottom_left,
-				top_right,
-				top_right,
-				bottom_left,
-				bottom_right,
-			]))
+			var grid_position := bounds.position + Vector2i(local_x, local_y)
+			if not data.is_valid_grid(grid_position):
+				continue
+			var surface_height := data.get_surface_height_at_grid(grid_position)
+			var cs := data.cell_size
+
+			# 顶部碰撞面
+			var tl := Vector3(float(local_x) * cs, surface_height, float(local_y) * cs)
+			var bl := Vector3(float(local_x) * cs, surface_height, float(local_y + 1) * cs)
+			var tr := Vector3(float(local_x + 1) * cs, surface_height, float(local_y) * cs)
+			var br := Vector3(float(local_x + 1) * cs, surface_height, float(local_y + 1) * cs)
+			faces.append_array(PackedVector3Array([tl, bl, tr, tr, bl, br]))
+
+			# 侧面碰撞面（仅在高于邻居时生成）
+			for dir_info in SIDE_DIRECTIONS:
+				var neighbor_grid: Vector2i = grid_position + dir_info.offset
+				if not data.is_valid_grid(neighbor_grid):
+					continue
+				var neighbor_height := data.get_surface_height_at_grid(neighbor_grid)
+				if surface_height <= neighbor_height:
+					continue
+				var ca: Vector2i = dir_info.corner_a
+				var cb: Vector2i = dir_info.corner_b
+				var top_a := Vector3(
+					(float(local_x) + float(ca.x)) * cs, surface_height,
+					(float(local_y) + float(ca.y)) * cs)
+				var top_b := Vector3(
+					(float(local_x) + float(cb.x)) * cs, surface_height,
+					(float(local_y) + float(cb.y)) * cs)
+				var bot_a := Vector3(
+					(float(local_x) + float(ca.x)) * cs, neighbor_height,
+					(float(local_y) + float(ca.y)) * cs)
+				var bot_b := Vector3(
+					(float(local_x) + float(cb.x)) * cs, neighbor_height,
+					(float(local_y) + float(cb.y)) * cs)
+				faces.append_array(PackedVector3Array([top_a, top_b, bot_a, bot_a, top_b, bot_b]))
+
 	return faces
 
 
@@ -220,9 +318,10 @@ static func build_tree_multimesh(data: DemoMapData, bounds: Rect2i) -> MultiMesh
 				_coordinate_random(grid_position + Vector2i(-19, 97), data.seed)
 			)
 			var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scale_value)
+			# 树木放置在阶梯量化后的格子顶部
 			var origin := Vector3(
 				(float(local_x) + 0.5) * data.cell_size,
-				data.get_tile_height_at(grid_position) + 0.9 * scale_value,
+				data.get_surface_height_at_grid(grid_position) + 0.9 * scale_value,
 				(float(local_y) + 0.5) * data.cell_size
 			)
 			transforms.append(Transform3D(basis, origin))
@@ -265,28 +364,15 @@ static func _get_surface_key(terrain_type: int, zone_type: int) -> int:
 			return SURFACE_NEUTRAL
 
 
-static func _append_quad_indices(indices: PackedInt32Array, top_left: int, width: int) -> void:
+static func _append_quad_indices(indices: PackedInt32Array, top_left: int) -> void:
 	indices.append_array(PackedInt32Array([
 		top_left,
-		top_left + width,
 		top_left + 1,
+		top_left + 2,
+		top_left + 2,
 		top_left + 1,
-		top_left + width,
-		top_left + width + 1,
+		top_left + 3,
 	]))
-
-
-static func _get_local_vertex(
-	data: DemoMapData,
-	bounds: Rect2i,
-	local_x: int,
-	local_y: int
-) -> Vector3:
-	return Vector3(
-		float(local_x) * data.cell_size,
-		data.get_height_sample(bounds.position + Vector2i(local_x, local_y)),
-		float(local_y) * data.cell_size
-	)
 
 
 static func _create_single_surface_mesh(

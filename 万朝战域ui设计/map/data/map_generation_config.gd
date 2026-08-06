@@ -49,6 +49,10 @@ const ROAD_HEIGHT_BLEND_MARGIN := 3.0
 const MAX_ROAD_AVERAGE_SLOPE := 0.075
 const MAX_BUILDABLE_SLOPE := 0.28
 
+# 阶梯地形高度量化步长。格子顶部高度 = round(raw_height / HEIGHT_STEP) * HEIGHT_STEP。
+# 0.5 使平原（0.45 振幅）近似保持原高度，山地（2.0~12.0）产生清晰阶梯层次。
+const HEIGHT_STEP := 0.5
+
 var map_size := DEFAULT_MAP_SIZE
 var chunk_size := DEFAULT_CHUNK_SIZE
 var cell_size := DEFAULT_CELL_SIZE

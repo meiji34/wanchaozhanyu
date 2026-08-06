@@ -375,6 +375,20 @@ func get_height_at_grid(grid_position: Vector2i) -> float:
 	)
 
 
+## 阶梯地形：返回格子量化后的顶部高度（surface_height）。
+## 原始高度数据 tile_heights[] 保持不变，此方法仅用于视觉和碰撞。
+func get_surface_height_at_grid(grid_position: Vector2i) -> float:
+	var raw_height := get_height_at_grid(grid_position)
+	var level := roundi(raw_height / MapGenerationConfig.HEIGHT_STEP)
+	return float(level) * MapGenerationConfig.HEIGHT_STEP
+
+
+## 阶梯地形：返回世界坐标处的量化高度（用于射线拾取）。
+func get_surface_height_at_world(world_x: float, world_z: float) -> float:
+	var grid_position := world_to_grid(Vector3(world_x, 0.0, world_z))
+	return get_surface_height_at_grid(grid_position)
+
+
 func get_height_at_world(world_x: float, world_z: float) -> float:
 	var sample_position := Vector2(
 		world_x / cell_size + 0.5,
@@ -412,7 +426,8 @@ func get_surface_normal_at_vertex(vertex_grid: Vector2i) -> Vector3:
 
 
 func get_surface_world_position(grid_position: Vector2i, offset: float = 0.0) -> Vector3:
-	return grid_to_world(grid_position, get_height_at_grid(grid_position) + offset)
+	# 使用阶梯量化后的格子顶部高度，确保实体与阶梯地形一致
+	return grid_to_world(grid_position, get_surface_height_at_grid(grid_position) + offset)
 
 
 func recalculate_height_range() -> void:
@@ -458,7 +473,8 @@ func intersect_heightfield_ray(
 	var hit := ray_origin + ray_direction * ((start_distance + end_distance) * 0.5)
 	if not is_valid_grid(world_to_grid(hit)):
 		return null
-	hit.y = get_height_at_world(hit.x, hit.z)
+	# 返回阶梯量化后的高度，与可视 Mesh 一致
+	hit.y = get_surface_height_at_world(hit.x, hit.z)
 	return hit
 
 
@@ -577,4 +593,5 @@ func _get_ray_height_delta(
 	distance: float
 ) -> float:
 	var point := ray_origin + ray_direction * distance
-	return point.y - get_height_at_world(point.x, point.z)
+	# 使用阶梯量化高度，确保射线拾取与阶梯 Mesh 一致
+	return point.y - get_surface_height_at_world(point.x, point.z)

@@ -272,7 +272,7 @@ func _place_selection_marker(
 			footprint_size = city.footprint_size
 	_selection_marker.position = map_controller.map_data.grid_to_world(
 		marker_grid_position,
-		map_controller.map_data.get_height_at_grid(marker_grid_position) + 0.08
+		map_controller.map_data.get_surface_height_at_grid(marker_grid_position) + 0.08
 	)
 	_selection_marker.scale = Vector3(
 		float(footprint_size.x),
