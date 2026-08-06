@@ -1,0 +1,128 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/components/map_input_anchor.gd" id="1_map_input"]
+[ext_resource type="Script" path="res://ui/components/map_area.gd" id="2_map_area"]
+
+[node name="MapArea" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("2_map_area")
+
+[node name="PlaceholderBackground" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.10, 0.13, 0.105, 1)
+
+[node name="MapViewportContainer" type="SubViewportContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+stretch = true
+script = ExtResource("1_map_input")
+
+[node name="MapViewport" type="SubViewport" parent="MapViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(960, 540)
+render_target_update_mode = 4
+
+[node name="PlaceholderLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -28.0
+offset_right = 120.0
+offset_bottom = 28.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.72, 0.63, 0.45, 0.9)
+theme_override_font_sizes/font_size = 26
+text = "地图载入中"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MapUILayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MapTools" type="VBoxContainer" parent="MapUILayer"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -168.0
+offset_top = 112.0
+offset_right = -16.0
+offset_bottom = 368.0
+grow_horizontal = 0
+theme_override_constants/separation = 8
+
+[node name="ZoomIn" type="Button" parent="MapUILayer/MapTools"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+tooltip_text = "放大地图"
+theme_override_font_sizes/font_size = 26
+text = "+"
+
+[node name="ZoomOut" type="Button" parent="MapUILayer/MapTools"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+tooltip_text = "缩小地图"
+theme_override_font_sizes/font_size = 26
+text = "−"
+
+[node name="ToggleViewMode" type="Button" parent="MapUILayer/MapTools"]
+custom_minimum_size = Vector2(152, 56)
+layout_mode = 2
+tooltip_text = "临时调试按钮：切换经营 3D / 战争 2.5D"
+theme_override_font_sizes/font_size = 18
+text = "经营 3D"
+
+[node name="ResetView" type="Button" parent="MapUILayer/MapTools"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+tooltip_text = "视角复位并朝北"
+theme_override_font_sizes/font_size = 20
+text = "北"
+
+[node name="ScoutIndicator" type="Label" parent="MapUILayer"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -180.0
+offset_top = 18.0
+offset_right = 180.0
+offset_bottom = 54.0
+grow_horizontal = 2
+visible = false
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.95, 0.72, 0.25, 1.0)
+theme_override_font_sizes/font_size = 18
+text = "侦察已发出"
+horizontal_alignment = 1
+vertical_alignment = 1

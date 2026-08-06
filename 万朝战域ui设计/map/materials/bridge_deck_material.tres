@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://map/shaders/bridge_deck.gdshader" id="1_shader"]
+[ext_resource type="Texture2D" path="res://map/assets/sprites/terrain/bridge_deck_albedo.png" id="2_texture"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/bridge_texture = ExtResource("2_texture")
+shader_parameter/tint_color = Color(0.92, 0.82, 0.68, 1)

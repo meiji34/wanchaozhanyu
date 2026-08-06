@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/placeholders/feature_placeholder_screen.gd" id="1"]
+
+[node name="ExilePlaceholderScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+feature_title = "流亡"
+feature_description = "城破后仍可继续。后续提供迁移流亡、留守反攻或并入盟友的正式选择。"
+

@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/placeholders/feature_placeholder_screen.gd" id="1"]
+
+[node name="GeneralsPlaceholderScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+feature_title = "武将"
+feature_description = "后续展示名将编队、状态与培养；当前不实现名将数值和永久损失逻辑。"
+

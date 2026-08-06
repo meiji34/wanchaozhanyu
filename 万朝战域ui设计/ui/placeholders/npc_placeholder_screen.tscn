@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/placeholders/feature_placeholder_screen.gd" id="1"]
+
+[node name="NpcPlaceholderScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+feature_title = "NPC 对话"
+feature_description = "后续承载汉献帝等规则型 NPC 的对话与事件入口；当前不实现好感和随机剧情。"
+

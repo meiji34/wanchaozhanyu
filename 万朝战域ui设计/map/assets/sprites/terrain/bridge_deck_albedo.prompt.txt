@@ -1,0 +1,5 @@
+用途：Godot 4.7 移动端 RTS/SLG 地图的临时桥梁桥面纹理；后续真实桥梁模型接入后可直接替换。
+
+Create one square, genuinely seamless, edge-to-edge tileable bridge-deck albedo texture for a Godot 4.7 mobile RTS/SLG map. Orthographic top-down texture only, clean HD hand-painted game asset style matching muted olive-brown terrain and teal river water. A repeating deck of weathered ancient Chinese timber planks: warm dark walnut and desaturated brown boards, subtle grain, occasional wooden pegs and narrow seams, restrained contrast, readable from a distant 3/4 strategy camera. The planks should run vertically from the top edge to the bottom edge so the texture can repeat along a bridge strip. Uniform diffuse lighting, no perspective convergence. Foundation/strip art only. No complete bridge silhouette, no ends or caps, no railings, no pillars, no ropes, no water, no riverbank, no grass, no mud, no rocks, no buildings, no units, no UI, no text, no symbols, no border, no cast shadows, no highlights implying a fixed light direction, no transparent background, no pixel art, no watermark. Every edge must tile without a visible seam. Output a single square texture.
+
+生成后规范化尺寸：1024 × 1024 PNG。

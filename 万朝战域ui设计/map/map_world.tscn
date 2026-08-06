@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://bd67nw28h5nkv"]
+
+[ext_resource type="Script" uid="uid://cx4tbb0v5arm4" path="res://map/map_world.gd" id="1_0yv0v"]
+[ext_resource type="Script" uid="uid://dgj83xufbqrbh" path="res://map/controllers/map_controller.gd" id="2_cill5"]
+[ext_resource type="Script" uid="uid://btuca18dsqtvo" path="res://map/controllers/camera_rig.gd" id="3_bou6g"]
+[ext_resource type="Script" uid="uid://cw0dq3iasqkwu" path="res://map/controllers/map_input_controller.gd" id="4_ck761"]
+[ext_resource type="Script" uid="uid://dbspbb5gjpvkb" path="res://map/debug/map_debug_overlay.gd" id="5_8nlcl"]
+
+[node name="MapWorld" type="Node3D" unique_id=1201626786]
+script = ExtResource("1_0yv0v")
+
+[node name="MapController" type="Node" parent="." unique_id=1816452994]
+script = ExtResource("2_cill5")
+
+[node name="CameraRig" type="Node3D" parent="." unique_id=466358166]
+script = ExtResource("3_bou6g")
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig" unique_id=202089840]
+
+[node name="MapInputController" type="Node" parent="." unique_id=949907388]
+script = ExtResource("4_ck761")
+
+[node name="ChunkRoot" type="Node3D" parent="." unique_id=860259161]
+
+[node name="EntityRoot" type="Node3D" parent="." unique_id=143619010]
+
+[node name="SelectionRoot" type="Node3D" parent="." unique_id=2093745305]
+
+[node name="DebugRoot" type="Node3D" parent="." unique_id=2045584057]
+
+[node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=999031442]
+script = ExtResource("5_8nlcl")

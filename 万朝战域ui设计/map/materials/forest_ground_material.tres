@@ -1,0 +1,17 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://map/shaders/grass_ground.gdshader" id="1_shader"]
+[ext_resource type="Texture2D" path="res://map/assets/sprites/terrain/grass_albedo.png" id="2_texture"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/ground_texture = ExtResource("2_texture")
+shader_parameter/tint_color = Color(0.48, 0.76, 0.47, 1)
+shader_parameter/detail_scale = 0.12
+shader_parameter/secondary_scale = 0.073
+shader_parameter/secondary_mix = 0.3
+shader_parameter/macro_scale = 0.018
+shader_parameter/macro_strength = 0.14
+shader_parameter/elevation_min = -2.0
+shader_parameter/elevation_max = 12.0
+shader_parameter/elevation_contrast = 0.19

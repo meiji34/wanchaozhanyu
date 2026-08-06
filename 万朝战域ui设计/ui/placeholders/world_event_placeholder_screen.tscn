@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/placeholders/feature_placeholder_screen.gd" id="1"]
+
+[node name="WorldEventPlaceholderScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+feature_title = "全服事件"
+feature_description = "后续承载洛阳、汉献帝和玉玺等全服焦点；当前仅保留独立导航入口。"
+
