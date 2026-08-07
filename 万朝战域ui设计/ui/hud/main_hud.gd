@@ -52,6 +52,12 @@ var _feature_page_container: Control
 var _feature_page: Control = null
 var _is_showing_feature_page := false
 
+# 建造模式 UI（按钮 + 确认/取消面板，均复用 UIBuilder 现有样式）
+var _build_button: Button
+var _build_panel: PanelContainer
+var _build_reason_label: Label
+var _build_confirm_button: Button
+
 
 func _ready() -> void:
 	# 初始化阵营上下文
@@ -108,6 +114,9 @@ func _build_ui() -> void:
 	_map_area.selection_changed.connect(_on_map_selection_changed)
 	_map_area.selection_cleared.connect(_on_map_selection_cleared)
 	_map_area.map_load_failed.connect(_on_map_load_failed)
+	_map_area.build_mode_changed.connect(_on_build_mode_changed)
+	_map_area.placement_state_changed.connect(_on_build_placement_state_changed)
+	_map_area.building_placed.connect(_on_building_placed)
 
 	var overlay := Control.new()
 	overlay.name = "HUDOverlay"
@@ -122,6 +131,7 @@ func _build_ui() -> void:
 	_build_more_panel(overlay)
 	_build_selection_panel(overlay)
 	_build_interaction_panel(overlay)
+	_build_construction_panel(overlay)
 	_build_feature_page_container(overlay)
 
 
@@ -179,6 +189,12 @@ func _build_bottom_navigation(parent: Control) -> void:
 	nav_panel.add_child(nav)
 	for route_data in PRIMARY_ROUTES:
 		_add_route_button(nav, str(route_data.label), str(route_data.route), true)
+	# 建造入口：与主导航按钮同一组件、同一尺寸规则
+	_build_button = UIBuilder.make_button("建造", 96)
+	_build_button.custom_minimum_size.y = 56
+	_build_button.tooltip_text = "进入建造模式"
+	_build_button.pressed.connect(_toggle_build_mode)
+	nav.add_child(_build_button)
 	var more_button := UIBuilder.make_button("更多", 96)
 	more_button.custom_minimum_size.y = 56
 	more_button.pressed.connect(_toggle_more_panel)
@@ -276,7 +292,42 @@ func _build_interaction_panel(parent: Control) -> void:
 	_interaction_panel.name = "MapInteractionPanel"
 	_interaction_panel.configure(_action_resolver, _interaction_service)
 	_interaction_panel.panel_closed.connect(_on_interaction_panel_closed)
+	# 删除建筑走真实业务链路：桥接层 → MapArea → MapWorld → MapBuildingManager
+	_interaction_service.set_delete_building_handler(Callable(_map_area, "request_delete_building"))
 	parent.add_child(_interaction_panel)
+
+
+## 建造模式面板：标题 + 合法性提示 + 确认/取消，样式复用 UIBuilder 与现有弹层规范
+func _build_construction_panel(parent: Control) -> void:
+	_build_panel = UIBuilder.make_panel(16)
+	_build_panel.name = "ConstructionPanel"
+	_build_panel.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_build_panel.offset_left = -330
+	_build_panel.offset_top = -240
+	_build_panel.offset_right = 330
+	_build_panel.offset_bottom = -140
+	_build_panel.visible = false
+	parent.add_child(_build_panel)
+	var content := VBoxContainer.new()
+	UIBuilder.set_box_spacing(content, 8)
+	_build_panel.add_child(content)
+	var title := UIBuilder.make_label("建造：测试建筑（3×3）", 20, UIBuilder.COLOR_ACCENT)
+	content.add_child(title)
+	_build_reason_label = UIBuilder.make_label("点击地图格子选择建造位置", 15, UIBuilder.COLOR_MUTED, true)
+	_build_reason_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content.add_child(_build_reason_label)
+	var row := HBoxContainer.new()
+	UIBuilder.set_box_spacing(row, 12)
+	content.add_child(row)
+	_build_confirm_button = UIBuilder.make_primary_button("确认", 140)
+	_build_confirm_button.disabled = true
+	_build_confirm_button.tooltip_text = "在当前预览位置放置建筑"
+	_build_confirm_button.pressed.connect(_on_build_confirm_pressed)
+	row.add_child(_build_confirm_button)
+	var cancel := UIBuilder.make_button("取消", 140)
+	cancel.tooltip_text = "退出建造模式"
+	cancel.pressed.connect(_on_build_cancel_pressed)
+	row.add_child(cancel)
 
 
 func _build_feature_page_container(parent: Control) -> void:
@@ -471,8 +522,59 @@ func _build_interaction_context(selection: Dictionary) -> MapInteractionContext:
 			return MapInteractionContext.from_city_snapshot(selection, map_data)
 		"resource":
 			return MapInteractionContext.from_resource_snapshot(selection, map_data)
+		"building":
+			return MapInteractionContext.from_building_snapshot(selection, map_data)
 		_:
 			return MapInteractionContext.from_tile_snapshot(selection, map_data)
+
+
+## ——— 建造模式 UI 事件 ———
+
+func _toggle_build_mode() -> void:
+	if _map_area.is_build_mode_active():
+		_map_area.cancel_build_mode()
+		return
+	_more_panel.visible = false
+	_map_area.enter_build_mode()
+
+
+func _on_build_mode_changed(active: bool) -> void:
+	_build_panel.visible = active
+	if active:
+		# 进入建造模式时关闭其他浮层与原选择信息 UI，避免误触发
+		_more_panel.visible = false
+		_clear_map_selection()
+		_build_reason_label.text = "移动鼠标预览，左键选择建造位置"
+		_build_confirm_button.disabled = true
+
+
+func _on_build_placement_state_changed(result: Dictionary) -> void:
+	var valid := bool(result.get("valid", false))
+	var locked := bool(result.get("locked", false))
+	# 确认只在“已锁定 + 合法”时可用；非法位置允许锁定但不可确认
+	_build_confirm_button.disabled = not (valid and locked)
+	if locked:
+		_build_reason_label.text = (
+			"位置已锁定，可以建造" if valid else str(result.get("reason", "当前位置不可建造"))
+		)
+	else:
+		_build_reason_label.text = (
+			"位置合法，左键锁定建造位置" if valid else str(result.get("reason", "当前位置不可建造"))
+		)
+
+
+func _on_build_confirm_pressed() -> void:
+	var result := _map_area.confirm_build()
+	if not bool(result.get("success", false)):
+		NavigationManager.show_message("无法建造", str(result.get("reason", "当前位置不可建造")))
+
+
+func _on_build_cancel_pressed() -> void:
+	_map_area.cancel_build_mode()
+
+
+func _on_building_placed(snapshot: Dictionary) -> void:
+	NavigationManager.show_message("建造完成", "「%s」已放置。" % str(snapshot.get("name", "建筑")))
 
 
 func _clear_map_selection() -> void:

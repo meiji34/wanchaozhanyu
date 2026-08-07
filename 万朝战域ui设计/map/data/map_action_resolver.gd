@@ -45,6 +45,8 @@ func get_available_actions(context: MapInteractionContext) -> Array[MapInteracti
 			actions = _actions_for_hidden_path(context)
 		MapActionConstants.TargetType.HIGH_GROUND:
 			actions = _actions_for_landmark(context)
+		MapActionConstants.TargetType.BUILDING:
+			actions = _actions_for_building(context)
 		MapActionConstants.TargetType.TILE:
 			actions = _actions_for_tile(context)
 		_:
@@ -156,6 +158,17 @@ func _actions_for_tile(ctx: MapInteractionContext) -> Array[MapInteractionAction
 	return actions
 
 
+## ——— 建筑（第一版建造系统占位建筑） ———
+## 己方建筑：查看 + 删除；非己方建筑：仅查看（不新增敌方建筑攻击功能）。
+## 阵营关系基于 owner_faction_id 与当前阵营实时计算，切换阵营后刷新即生效。
+func _actions_for_building(ctx: MapInteractionContext) -> Array[MapInteractionAction]:
+	var actions: Array[MapInteractionAction] = []
+	actions.append(_make(MapActionConstants.ACTION_VIEW, ctx))
+	if _get_relation(ctx) == DemoPlayerContext.FactionRelation.FRIENDLY:
+		actions.append(_make(MapActionConstants.ACTION_DELETE_BUILDING, ctx))
+	return actions
+
+
 ## ——— 道路 ———
 func _actions_for_road(ctx: MapInteractionContext) -> Array[MapInteractionAction]:
 	var actions: Array[MapInteractionAction] = []
@@ -211,7 +224,7 @@ func _make(
 
 
 func _requires_confirmation(action_id: StringName) -> bool:
-	return action_id in [MapActionConstants.ACTION_ATTACK, MapActionConstants.ACTION_OCCUPY, MapActionConstants.ACTION_CAPTURE_CAPITAL]
+	return action_id in [MapActionConstants.ACTION_ATTACK, MapActionConstants.ACTION_OCCUPY, MapActionConstants.ACTION_CAPTURE_CAPITAL, MapActionConstants.ACTION_DELETE_BUILDING]
 
 
 func _build_metadata(action_id: StringName, ctx: MapInteractionContext) -> Dictionary:

@@ -13,6 +13,8 @@ signal map_ready
 signal tile_selected(tile_id: Vector2i)
 signal city_selected(city_id: String, tile_id: Vector2i)
 signal resource_selected(resource_id: String, tile_id: Vector2i)
+## 建造系统生成的占位建筑被点击
+signal building_selected(building_id: String, tile_id: Vector2i)
 signal selection_cleared
 signal view_mode_changed(mode: int, display_name: String)
 ## 中立侦察请求信号，由玩法层接收后决定是否发起正式侦察
@@ -34,6 +36,12 @@ var init_state: int = MapInitState.NOT_STARTED
 var _selection_marker: MeshInstance3D
 var _selected_city_id := ""
 var _selected_resource_id := ""
+var _selected_building_id := ""
+
+# 建造系统（_ready 中创建，管理器负责数据与校验，控制器负责建造模式状态）
+var building_manager: MapBuildingManager
+var construction: MapConstructionController
+var _player_context: DemoPlayerContext
 
 
 func _ready() -> void:
@@ -46,6 +54,7 @@ func _ready() -> void:
 	map_controller.map_ready.connect(_on_map_ready)
 	map_controller.fog_changed.connect(_emit_fog_state)
 	map_controller.initialize(camera_rig, chunk_root, entity_root)
+	_setup_construction_system()
 	debug_overlay.setup(map_controller, camera_rig)
 	# 初始化经营模式距离薄雾
 	_apply_view_mode_environment()
@@ -171,6 +180,10 @@ func select_at_viewport_position(viewport_position: Vector2) -> void:
 	if not map_controller.map_data.is_valid_grid(grid_position):
 		clear_selection()
 		return
+	# 建造模式下点击优先用于选择建造位置，不触发原有选择与信息 UI
+	if is_build_mode_active():
+		construction.handle_map_click(grid_position)
+		return
 	var city := map_controller.get_city_at_grid(grid_position)
 	if city != null:
 		_select_city(city)
@@ -178,13 +191,110 @@ func select_at_viewport_position(viewport_position: Vector2) -> void:
 	var resource_point := map_controller.get_resource_at_grid(grid_position)
 	if resource_point != null:
 		_select_resource(resource_point)
+		return
+	var building := building_manager.get_building_at_grid(grid_position) if building_manager != null else null
+	if building != null:
+		_select_building(building)
 	else:
 		_select_tile(grid_position)
+
+
+## 创建建造系统：建筑管理器 + 建造模式控制器（节点仅创建一次）
+func _setup_construction_system() -> void:
+	building_manager = MapBuildingManager.new()
+	building_manager.name = "BuildingManager"
+	add_child(building_manager)
+	building_manager.setup(map_controller)
+	construction = MapConstructionController.new()
+	construction.name = "ConstructionController"
+	add_child(construction)
+	construction.setup(self, building_manager)
+	if _player_context != null:
+		construction.set_player_context(_player_context)
+
+
+## 注入玩家上下文（由 MapArea 转发），供建造归属阵营判断
+func set_player_context(ctx: DemoPlayerContext) -> void:
+	_player_context = ctx
+	if construction != null:
+		construction.set_player_context(ctx)
+
+
+## ——— 建造模式公开 API（供 HUD 调用） ———
+
+func enter_build_mode() -> void:
+	if construction != null:
+		construction.enter_build_mode(MapBuildingDefinition.create_test_building())
+
+
+func exit_build_mode() -> void:
+	if construction != null:
+		construction.exit_build_mode()
+
+
+func is_build_mode_active() -> bool:
+	return construction != null and construction.is_build_mode
+
+
+func confirm_build_mode() -> Dictionary:
+	if construction == null:
+		return {"success": false, "reason": "建造系统不可用"}
+	return construction.confirm()
+
+
+func get_construction_controller() -> MapConstructionController:
+	return construction
+
+
+## 删除建筑统一入口（UI 经 MapArea 转发到此，最终由 MapBuildingManager 完成业务校验与执行）。
+## 请求阵营在调用时实时读取，避免阵营切换后的过期缓存导致越权或误判。
+func request_delete_building(building_id: String) -> Dictionary:
+	if building_manager == null:
+		return {"success": false, "reason": "建造系统不可用", "message": "建造系统不可用"}
+	var faction := (
+		_player_context.current_faction_id
+		if _player_context != null
+		else map_controller.current_fog_faction_id
+	)
+	var result := building_manager.request_delete_building(building_id, faction)
+	# 若被删除的正是当前选中建筑，同步清除选中状态并通知 UI 关闭面板
+	if bool(result.get("success", false)) and _selected_building_id == building_id:
+		clear_selection()
+	return result
+
+
+func get_building_snapshot(building_id: String) -> Dictionary:
+	if building_manager == null:
+		return {}
+	var building := building_manager.get_building_by_id(building_id)
+	return building.get_snapshot() if building != null else {}
+
+
+## 建造模式悬停拾取：将屏幕坐标射线求交为格子后交给建造系统。
+## 复用与点击完全相同的拾取路径，未命中或越界时保持当前预览不变。
+func hover_build_position(viewport_position: Vector2) -> void:
+	if not is_build_mode_active():
+		return
+	if init_state != MapInitState.READY or map_controller.map_data == null:
+		return
+	var hit_variant: Variant = camera_rig.screen_to_ground(
+		viewport_position,
+		map_controller.map_data
+	)
+	if hit_variant == null:
+		return
+	var grid_position := map_controller.map_data.world_to_grid(hit_variant as Vector3)
+	if not map_controller.map_data.is_valid_grid(grid_position):
+		return
+	construction.hover_at_grid(grid_position)
 
 
 func request_scout_at_viewport_position(viewport_position: Vector2) -> void:
 	## 发出中立侦察请求。地图只做格子拾取，不实现正式侦察逻辑。
 	if init_state != MapInitState.READY or map_controller.map_data == null:
+		return
+	# 建造模式下点击用于选择建造位置，不触发侦察
+	if is_build_mode_active():
 		return
 	var hit_variant: Variant = camera_rig.screen_to_ground(
 		viewport_position,
@@ -198,9 +308,20 @@ func request_scout_at_viewport_position(viewport_position: Vector2) -> void:
 	scout_requested.emit(grid_position)
 
 
+func _select_building(building: MapBuildingData) -> void:
+	_selected_city_id = ""
+	_selected_resource_id = ""
+	_selected_building_id = building.building_id
+	map_controller.set_selected_city("")
+	_place_selection_marker(building.origin_cell, false, building.footprint_size)
+	last_hit_grid = building.origin_cell
+	building_selected.emit(building.building_id, building.origin_cell)
+
+
 func clear_selection() -> void:
 	_selected_city_id = ""
 	_selected_resource_id = ""
+	_selected_building_id = ""
 	map_controller.set_selected_city("")
 	_selection_marker.visible = false
 	selection_cleared.emit()
@@ -227,6 +348,9 @@ func get_debug_snapshot() -> Dictionary:
 	snapshot["camera"] = camera_rig.get_debug_data()
 	snapshot["selected_city_id"] = _selected_city_id
 	snapshot["selected_resource_id"] = _selected_resource_id
+	snapshot["selected_building_id"] = _selected_building_id
+	snapshot["building_count"] = building_manager.get_building_count() if building_manager != null else 0
+	snapshot["build_mode"] = is_build_mode_active()
 	snapshot["selection_visible"] = _selection_marker.visible
 	return snapshot
 

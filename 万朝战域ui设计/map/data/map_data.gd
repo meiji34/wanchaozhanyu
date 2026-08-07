@@ -102,6 +102,16 @@ func grid_to_world(grid_position: Vector2i, height: float = 0.0) -> Vector3:
 	)
 
 
+## 连续格子坐标（允许半格）转世界坐标。
+## 供多格建筑的视觉中心计算使用，与 grid_to_world 保持同一套换算规则。
+func grid_to_world_continuous(grid_position: Vector2, height: float = 0.0) -> Vector3:
+	return Vector3(
+		grid_position.x * cell_size,
+		height,
+		grid_position.y * cell_size
+	)
+
+
 func vertex_grid_to_world(vertex_grid: Vector2i, height: float = 0.0) -> Vector3:
 	# Tile 坐标表示格子中心，因此顶点坐标需要向左上偏移半格。
 	return Vector3(

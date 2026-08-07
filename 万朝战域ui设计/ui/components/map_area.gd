@@ -8,6 +8,10 @@ signal selection_cleared
 signal fog_state_changed(explored_ratio: float, visible_count: int, unknown_count: int)
 signal scout_requested(tile_id: Vector2i)
 signal view_mode_changed(mode: int, display_name: String)
+## 建造系统信号转发（来源：MapConstructionController）
+signal build_mode_changed(active: bool)
+signal placement_state_changed(result: Dictionary)
+signal building_placed(snapshot: Dictionary)
 
 @export_file("*.tscn") var map_scene_path := "res://map/map_world.tscn"
 
@@ -84,8 +88,16 @@ func _load_map_world() -> void:
 	_map_world.view_mode_changed.connect(_on_view_mode_changed)
 	_map_world.scout_requested.connect(_on_scout_requested)
 	_map_world.fog_state_changed.connect(_on_fog_state_changed)
+	_map_world.building_selected.connect(_on_building_selected)
 	_map_viewport.add_child(_map_world)
 	_input_anchor.set_map_world(_map_world)
+	# 转发玩家上下文与建造系统信号（各连接一次，不随模式切换重复连接）
+	_map_world.set_player_context(_player_context)
+	var construction := _map_world.get_construction_controller()
+	if construction != null:
+		construction.build_mode_changed.connect(_on_build_mode_changed)
+		construction.placement_state_changed.connect(_on_placement_state_changed)
+		construction.building_placed.connect(_on_building_placed)
 	_set_placeholder_visible(false)
 	_update_view_mode_button(_map_world.get_view_mode_display_name())
 	_scout_indicator.visible = false
@@ -157,6 +169,53 @@ func _on_resource_selected(resource_id: String, _tile_id: Vector2i) -> void:
 	var snapshot := _map_world.get_resource_snapshot(resource_id)
 	if not snapshot.is_empty():
 		selection_changed.emit(snapshot)
+
+
+func _on_building_selected(building_id: String, _tile_id: Vector2i) -> void:
+	var snapshot := _map_world.get_building_snapshot(building_id)
+	if not snapshot.is_empty():
+		selection_changed.emit(snapshot)
+
+
+## ——— 建造模式公开 API（供 HUD 调用） ———
+
+func enter_build_mode() -> void:
+	if _map_world != null:
+		_map_world.enter_build_mode()
+
+
+func cancel_build_mode() -> void:
+	if _map_world != null:
+		_map_world.exit_build_mode()
+
+
+func is_build_mode_active() -> bool:
+	return _map_world != null and _map_world.is_build_mode_active()
+
+
+func confirm_build() -> Dictionary:
+	if _map_world == null:
+		return {"success": false, "reason": "地图尚未就绪"}
+	return _map_world.confirm_build_mode()
+
+
+## 删除建筑转发入口（供 DemoInteractionService 注入调用，building_id 为唯一标识）
+func request_delete_building(building_id: String) -> Dictionary:
+	if _map_world == null:
+		return {"success": false, "reason": "地图尚未就绪", "message": "地图尚未就绪"}
+	return _map_world.request_delete_building(building_id)
+
+
+func _on_build_mode_changed(active: bool) -> void:
+	build_mode_changed.emit(active)
+
+
+func _on_placement_state_changed(result: Dictionary) -> void:
+	placement_state_changed.emit(result)
+
+
+func _on_building_placed(snapshot: Dictionary) -> void:
+	building_placed.emit(snapshot)
 
 
 func _on_selection_cleared() -> void:

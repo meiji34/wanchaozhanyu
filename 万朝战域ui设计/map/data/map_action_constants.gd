@@ -15,6 +15,7 @@ const ACTION_RETURN_TO_CITY: StringName = &"return_to_city"
 const ACTION_OCCUPY: StringName = &"occupy"            ## 资源点占领（铁矿/木材/石料/粮食）
 const ACTION_CAPTURE_CAPITAL: StringName = &"capture_capital"  ## 中央主城夺取（独立于资源点占领）
 const ACTION_UPGRADE: StringName = &"upgrade"
+const ACTION_DELETE_BUILDING: StringName = &"delete_building"  ## 删除己方已建造建筑（仅普通玩家建筑）
 
 enum ActionCategory {
 	INFO,       ## 查看类
@@ -38,6 +39,7 @@ enum TargetType {
 	PASS,
 	HIGH_GROUND,
 	HIDDEN_PATH,
+	BUILDING,
 }
 
 
@@ -65,6 +67,8 @@ static func get_action_display_name(action_id: StringName) -> String:
 			return "夺取"
 		ACTION_UPGRADE:
 			return "升级"
+		ACTION_DELETE_BUILDING:
+			return "删除"
 		_:
 			return str(action_id)
 

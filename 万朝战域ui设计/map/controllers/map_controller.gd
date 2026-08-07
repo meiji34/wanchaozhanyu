@@ -139,6 +139,10 @@ func _reveal_all_capitals_for_all_factions() -> void:
 			if city == null:
 				continue
 			fog.reveal_circle(city.grid_position, radius, faction_id)
+			# 开局共享视野的语义是“当前可见”：必须同时写入 VISIBLE。
+			# 此前只写 EXPLORED，导致画面可见但可见性查询为假（VISIBLE 本身即视为已探索）。
+			# 三个阵营各自拥有独立 PackedByteArray（COW 写时复制），此处不存在视野串联。
+			fog.update_visibility(city.grid_position, radius, faction_id)
 		var after_total: int = fog.get_explored_count(faction_id)
 		print("[START_VISION_RESULT] faction=%d before=%d after=%d (diff=%d)" % [faction_id, before_total, after_total, after_total - before_total])
 		# COW 修复验证：直接检查四座主城周围关键格子是否已持久化
@@ -385,16 +389,21 @@ func verify_vision_isolation() -> void:
 
 
 func reveal_area(center_grid: Vector2i, radius: int, p_faction_id: int = -2) -> void:
-	## 揭示指定区域迷雾。-2 表示使用当前迷雾阵营 ID
+	## 揭示指定区域迷雾。-2 表示使用当前迷雾阵营 ID。
+	## “揭示”的语义是把区域真正揭示给当前阵营（当前可见）：必须同时写入
+	## EXPLORED 与 VISIBLE，仅写 EXPLORED 会导致画面可见但可见性查询为假。
+	## 只写入指定阵营自己的数据（COW 独立数组），不影响其他阵营。
 	var fog := map_data.fog_data if map_data != null else null
 	if fog == null:
 		return
 	var faction_id: int = current_fog_faction_id if p_faction_id == -2 else p_faction_id
 	var before_count: int = fog.get_explored_count(faction_id)
+	var before_visible: int = fog.get_visible_count(faction_id)
 	fog.reveal_circle(center_grid, radius, faction_id)
+	fog.update_visibility(center_grid, radius, faction_id)
 	var after_count: int = fog.get_explored_count(faction_id)
-	print("[REVEAL_BUTTON] faction=%d cell=%s radius=%d before=%d after=%d (diff=%d)" % [
-		faction_id, center_grid, radius, before_count, after_count, after_count - before_count
+	print("[REVEAL_BUTTON] faction=%d cell=%s radius=%d explored=%d→%d visible=%d→%d" % [
+		faction_id, center_grid, radius, before_count, after_count, before_visible, fog.get_visible_count(faction_id)
 	])
 	# 将所有活跃 Chunk 的 fog_faction_id 同步为当前值
 	for chunk_variant in active_chunks.values():

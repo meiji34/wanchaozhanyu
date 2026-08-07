@@ -4,6 +4,7 @@ const TEST_SCRIPTS: Array[String] = [
 	"res://tests/test_demo_map.gd",
 	"res://tests/test_environment_models.gd",
 	"res://tests/test_core_hud.gd",
+	"res://tests/test_construction.gd",
 ]
 
 

@@ -96,6 +96,27 @@ static func from_resource_snapshot(snapshot: Dictionary, map_data: DemoMapData =
 	return ctx
 
 
+## 从 MapWorld 的建筑快照创建（第一版建造系统占位建筑）
+static func from_building_snapshot(snapshot: Dictionary, map_data: DemoMapData = null) -> MapInteractionContext:
+	var ctx := MapInteractionContext.new()
+	ctx.target_type = MapActionConstants.TargetType.BUILDING
+	ctx.target_id = str(snapshot.get("id", "building"))
+	ctx.display_name = str(snapshot.get("name", "建筑"))
+	ctx.grid_position = snapshot.get("tile_id", Vector2i.ZERO) as Vector2i
+	ctx.faction = str(snapshot.get("faction", "中立"))
+	ctx.faction_id = int(snapshot.get("faction_id", DemoPlayerContext.FactionId.NONE))
+	ctx.is_discovered = true
+	ctx.is_visible = true
+	ctx.is_selectable = true
+	ctx.interaction_tags = [&"building"]
+	ctx.raw_snapshot = snapshot
+	if map_data != null:
+		ctx.world_position = map_data.grid_to_world(ctx.grid_position)
+		ctx.zone_type = map_data.get_zone_type_at(ctx.grid_position)
+		ctx.zone_name = MapTileTypes.get_zone_display_name(ctx.zone_type)
+	return ctx
+
+
 ## 从 MapWorld 的 tile 快照创建
 static func from_tile_snapshot(snapshot: Dictionary, map_data: DemoMapData = null) -> MapInteractionContext:
 	var ctx := MapInteractionContext.new()

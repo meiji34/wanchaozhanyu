@@ -6,12 +6,24 @@ extends RefCounted
 ## 正式版本由玩法模块（战斗/经济/资源）替换本层。
 ## 所有 Mock 行为必须标注为 Demo。
 
+## 删除建筑真实处理器（非 Mock）：由 HUD 在初始化时注入 MapArea.request_delete_building。
+## 业务校验与执行全部在 MapBuildingManager 内完成，本层只转发。
+var _delete_building_handler: Callable
+
+
+## 注入删除建筑处理器（签名为 func(building_id: String) -> Dictionary）
+func set_delete_building_handler(handler: Callable) -> void:
+	_delete_building_handler = handler
+
+
 ## 执行行动并返回模拟结果
 func execute(action: MapInteractionAction) -> Dictionary:
 	if action == null:
 		return _result(false, "无效行动")
 
 	match action.action_id:
+		MapActionConstants.ACTION_DELETE_BUILDING:
+			return _request_delete_building(action)
 		MapActionConstants.ACTION_HARVEST:
 			return _mock_harvest(action)
 		MapActionConstants.ACTION_ATTACK:
@@ -39,6 +51,17 @@ func execute(action: MapInteractionAction) -> Dictionary:
 
 
 ## ——— Mock 实现 ———
+
+## 删除建筑（真实业务操作，非 Mock）：通过注入的处理器转发到建造系统。
+## target_id 即 building_id；权限与数据清理由 MapBuildingManager 保证。
+func _request_delete_building(action: MapInteractionAction) -> Dictionary:
+	if not _delete_building_handler.is_valid():
+		return _result(false, "建造系统不可用，无法删除建筑")
+	var result: Variant = _delete_building_handler.call(action.target_id)
+	if result is Dictionary:
+		return result as Dictionary
+	return _result(false, "删除建筑失败")
+
 
 func _mock_harvest(action: MapInteractionAction) -> Dictionary:
 	var resource_type_name: String = str(action.metadata.get("raw_snapshot", {}).get("resource_name", "资源"))

@@ -187,6 +187,15 @@ func _build_detail_text() -> String:
 				parts.append("阵营：%s" % faction_name)
 			parts.append("坐标：(%d, %d)" % [_context.grid_position.x, _context.grid_position.y])
 
+		MapActionConstants.TargetType.BUILDING:
+			# 玩家建造建筑：阵营 + 占地 + 坐标（阵营归属为核心展示信息）
+			var building_faction: String = _get_faction_display()
+			if building_faction != "":
+				parts.append("阵营：%s" % building_faction)
+			var footprint: Vector2i = snapshot.get("footprint_size", Vector2i(3, 3))
+			parts.append("占地：%d×%d" % [footprint.x, footprint.y])
+			parts.append("坐标：(%d, %d)" % [_context.grid_position.x, _context.grid_position.y])
+
 		MapActionConstants.TargetType.RESOURCE, MapActionConstants.TargetType.IRON_MINE:
 			# 资源点：类型 + 区域 + 坐标 + 状态
 			var res_name: String = str(snapshot.get("resource_name", "未知"))
@@ -292,6 +301,7 @@ func _on_action_pressed(action_id: StringName) -> void:
 	if act.requires_confirmation:
 		_set_state(InteractionState.CONFIRMING)
 		_confirm_dialog.dialog_text = "确定要%s「%s」吗？" % [act.display_name, _context.display_name]
+		_confirm_dialog.ok_button_text = "确认%s" % act.display_name
 		_confirm_dialog.set_meta("pending_action_id", action_id)
 		_confirm_dialog.popup_centered()
 	else:
