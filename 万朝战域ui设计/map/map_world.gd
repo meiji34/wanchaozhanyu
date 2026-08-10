@@ -34,6 +34,8 @@ var init_state: int = MapInitState.NOT_STARTED
 # WorldEnvironment 由 _ensure_environment 动态创建，不使用 @onready
 
 var _selection_marker: MeshInstance3D
+var _route_highlight: MultiMeshInstance3D
+var _route_target_marker: MeshInstance3D  ## 路线预览目标格子标记
 var _selected_city_id := ""
 var _selected_resource_id := ""
 var _selected_building_id := ""
@@ -49,6 +51,8 @@ func _ready() -> void:
 	_ensure_environment()
 	_ensure_lighting()
 	_build_selection_marker()
+	_build_route_highlight()
+	_build_route_target_marker()
 	map_input_controller.setup(camera_rig, self)
 	camera_rig.view_mode_changed.connect(_on_view_mode_changed)
 	map_controller.map_ready.connect(_on_map_ready)
@@ -313,6 +317,7 @@ func _select_building(building: MapBuildingData) -> void:
 	_selected_resource_id = ""
 	_selected_building_id = building.building_id
 	map_controller.set_selected_city("")
+	clear_route_preview()
 	_place_selection_marker(building.origin_cell, false, building.footprint_size)
 	last_hit_grid = building.origin_cell
 	building_selected.emit(building.building_id, building.origin_cell)
@@ -324,6 +329,7 @@ func clear_selection() -> void:
 	_selected_building_id = ""
 	map_controller.set_selected_city("")
 	_selection_marker.visible = false
+	clear_route_preview()
 	selection_cleared.emit()
 
 
@@ -358,6 +364,7 @@ func get_debug_snapshot() -> Dictionary:
 func _select_city(city: MapCityData) -> void:
 	_selected_city_id = city.city_id
 	_selected_resource_id = ""
+	clear_route_preview()
 	map_controller.set_selected_city(city.city_id)
 	_place_selection_marker(city.grid_position, true)
 	last_hit_grid = city.grid_position
@@ -367,6 +374,7 @@ func _select_city(city: MapCityData) -> void:
 func _select_resource(resource_point: MapResourcePointData) -> void:
 	_selected_city_id = ""
 	_selected_resource_id = resource_point.resource_id
+	clear_route_preview()
 	map_controller.set_selected_city("")
 	_place_selection_marker(resource_point.grid_position, false, Vector2i(3, 3))
 	last_hit_grid = resource_point.grid_position
@@ -376,6 +384,7 @@ func _select_resource(resource_point: MapResourcePointData) -> void:
 func _select_tile(grid_position: Vector2i) -> void:
 	_selected_city_id = ""
 	_selected_resource_id = ""
+	clear_route_preview()
 	map_controller.set_selected_city("")
 	_place_selection_marker(grid_position, false)
 	last_hit_grid = grid_position
@@ -404,6 +413,120 @@ func _place_selection_marker(
 		float(footprint_size.y)
 	)
 	_selection_marker.visible = true
+
+
+## ——— 路线预览 ———
+
+## 路线预览统一入口（UI 经 MapArea 转发到此）。
+## 从当前阵营主城出发做 A* 寻路，命中后把路线格高亮渲染到 SelectionRoot。
+func request_route_preview(target_grid: Vector2i) -> Dictionary:
+	if init_state != MapInitState.READY or map_controller.map_data == null:
+		return {"success": false, "message": "地图尚未就绪，无法预览路线"}
+	if not map_controller.map_data.is_valid_grid(target_grid):
+		return {"success": false, "message": "目标格子超出地图范围"}
+	var faction := (
+		_player_context.current_faction_id
+		if _player_context != null
+		else map_controller.current_fog_faction_id
+	)
+	var capital_id := String(map_controller.get_capital_id_for_faction(faction))
+	if capital_id.is_empty():
+		return {"success": false, "message": "当前阵营没有主城，无法预览路线"}
+	var city := map_controller.map_data.get_city_by_id(capital_id)
+	if city == null:
+		return {"success": false, "message": "未找到主城数据"}
+	var path := RoutePathfinder.find_path(map_controller.map_data, city.grid_position, target_grid)
+	if path.is_empty():
+		clear_route_preview()
+		return {
+			"success": false,
+			"message": "无法找到从「%s」到 (%d, %d) 的可达路线" % [
+				city.display_name, target_grid.x, target_grid.y
+			]
+		}
+	_show_route_highlight(path)
+	return {
+		"success": true,
+		"message": "已展示从「%s」到 (%d, %d) 的路线，途经 %d 格（青色高亮）" % [
+			city.display_name, target_grid.x, target_grid.y, path.size()
+		]
+	}
+
+
+## 清除路线高亮（选择变化 / 清除选择时自动调用）
+func clear_route_preview() -> void:
+	if _route_highlight == null:
+		return
+	_route_highlight.visible = false
+	_route_highlight.multimesh.instance_count = 0
+	if _route_target_marker != null:
+		_route_target_marker.visible = false
+
+
+## 用 MultiMesh 一次性渲染整段路线的格子高亮（青色半透明方块，区别于琥珀色选中标记）
+func _show_route_highlight(path: Array[Vector2i]) -> void:
+	var multimesh := _route_highlight.multimesh
+	multimesh.instance_count = path.size()
+	for i in path.size():
+		var grid := path[i]
+		var world_pos := map_controller.map_data.grid_to_world(
+			grid,
+			map_controller.map_data.get_surface_height_at_grid(grid) + 0.1
+		)
+		multimesh.set_instance_transform(i, Transform3D(Basis.IDENTITY, world_pos))
+	_route_highlight.visible = true
+	# 在目标格子显示标记（路径最后一个点）
+	if _route_target_marker != null and not path.is_empty():
+		var target_grid := path[path.size() - 1]
+		var target_pos := map_controller.map_data.grid_to_world(
+			target_grid,
+			map_controller.map_data.get_surface_height_at_grid(target_grid) + 0.15
+		)
+		_route_target_marker.position = target_pos
+		_route_target_marker.visible = true
+
+
+func _build_route_highlight() -> void:
+	_route_highlight = MultiMeshInstance3D.new()
+	_route_highlight.name = "RouteHighlight"
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(1.6, 0.05, 1.6)
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.35, 0.85, 0.95, 0.55)
+	material.emission_enabled = true
+	material.emission = Color(0.25, 0.75, 0.9)
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mesh.material = material
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.mesh = mesh
+	_route_highlight.multimesh = multimesh
+	_route_highlight.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_route_highlight.visible = false
+	selection_root.add_child(_route_highlight)
+
+
+## 创建路线预览目标格子标记（红色圆环，区别于路线高亮和选中标记）
+func _build_route_target_marker() -> void:
+	_route_target_marker = MeshInstance3D.new()
+	_route_target_marker.name = "RouteTargetMarker"
+	# 用扁圆柱模拟圆环（高度很小，形成圆盘状）
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = 0.7
+	mesh.bottom_radius = 0.7
+	mesh.height = 0.04
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(1.0, 0.25, 0.15, 0.85)
+	material.emission_enabled = true
+	material.emission = Color(1.0, 0.2, 0.1)
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mesh.material = material
+	_route_target_marker.mesh = mesh
+	_route_target_marker.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_route_target_marker.visible = false
+	selection_root.add_child(_route_target_marker)
 
 
 func _build_selection_marker() -> void:

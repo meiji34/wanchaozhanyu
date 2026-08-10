@@ -155,6 +155,7 @@ func _actions_for_tile(ctx: MapInteractionContext) -> Array[MapInteractionAction
 	var actions: Array[MapInteractionAction] = []
 	actions.append(_make(MapActionConstants.ACTION_VIEW, ctx))
 	actions.append(_make(MapActionConstants.ACTION_SCOUT, ctx))
+	actions.append(_make(MapActionConstants.ACTION_ROUTE_PREVIEW, ctx))
 	return actions
 
 

@@ -187,6 +187,11 @@ func _reveal_around_cities_for_faction(faction_id: int) -> void:
 			print("[Fog] Revealed around city %s for faction %d" % [city.display_name, faction_id])
 
 
+## 公开包装：根据阵营 ID 获取主城 ID（供路线预览等玩法层调用）
+func get_capital_id_for_faction(faction_id: int) -> StringName:
+	return _get_capital_id_for_faction(faction_id)
+
+
 ## 根据阵营 ID 获取主城 ID
 func _get_capital_id_for_faction(faction_id: int) -> StringName:
 	match faction_id:

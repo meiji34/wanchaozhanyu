@@ -10,10 +10,19 @@ extends RefCounted
 ## 业务校验与执行全部在 MapBuildingManager 内完成，本层只转发。
 var _delete_building_handler: Callable
 
+## 路线预览真实处理器（非 Mock）：由 HUD 在初始化时注入 MapArea.request_route_preview。
+## 寻路与高亮渲染全部在地图模块内完成，本层只转发。
+var _route_preview_handler: Callable
+
 
 ## 注入删除建筑处理器（签名为 func(building_id: String) -> Dictionary）
 func set_delete_building_handler(handler: Callable) -> void:
 	_delete_building_handler = handler
+
+
+## 注入路线预览处理器（签名为 func(target_grid: Vector2i) -> Dictionary）
+func set_route_preview_handler(handler: Callable) -> void:
+	_route_preview_handler = handler
 
 
 ## 执行行动并返回模拟结果
@@ -33,7 +42,7 @@ func execute(action: MapInteractionAction) -> Dictionary:
 		MapActionConstants.ACTION_MARK:
 			return _mock_mark(action)
 		MapActionConstants.ACTION_ROUTE_PREVIEW:
-			return _mock_route_preview(action)
+			return _request_route_preview(action)
 		MapActionConstants.ACTION_INVESTIGATE:
 			return _mock_investigate(action)
 		MapActionConstants.ACTION_OCCUPY:
@@ -83,6 +92,17 @@ func _mock_scout(action: MapInteractionAction) -> Dictionary:
 
 func _mock_mark(action: MapInteractionAction) -> Dictionary:
 	return _result(true, "[Demo] 已标记位置（%s）。标记系统和战术面板尚未接入。" % action.grid_position)
+
+
+## 路线预览（真实业务操作，非 Mock）：通过注入的处理器转发到地图模块寻路并高亮。
+## 处理器未注入时回退到 Mock 文本，保证旧调用方不崩溃。
+func _request_route_preview(action: MapInteractionAction) -> Dictionary:
+	if not _route_preview_handler.is_valid():
+		return _mock_route_preview(action)
+	var result: Variant = _route_preview_handler.call(action.grid_position)
+	if result is Dictionary:
+		return result as Dictionary
+	return _result(false, "路线预览失败")
 
 
 func _mock_route_preview(action: MapInteractionAction) -> Dictionary:

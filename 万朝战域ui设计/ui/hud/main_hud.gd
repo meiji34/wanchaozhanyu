@@ -294,6 +294,8 @@ func _build_interaction_panel(parent: Control) -> void:
 	_interaction_panel.panel_closed.connect(_on_interaction_panel_closed)
 	# 删除建筑走真实业务链路：桥接层 → MapArea → MapWorld → MapBuildingManager
 	_interaction_service.set_delete_building_handler(Callable(_map_area, "request_delete_building"))
+	# 路线预览走真实业务链路：桥接层 → MapArea → MapWorld（寻路 + 格子高亮）
+	_interaction_service.set_route_preview_handler(Callable(_map_area, "request_route_preview"))
 	parent.add_child(_interaction_panel)
 
 
