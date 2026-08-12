@@ -1,0 +1,471 @@
+{
+  "assets": [
+    {
+      "bounds_godot_xyz_m": {
+        "dimensions": [
+          0.99983537197113,
+          1.77852487564087,
+          0.514499559998512
+        ],
+        "maximum": [
+          0.521335303783417,
+          1.77852487564087,
+          0.271160483360291
+        ],
+        "minimum": [
+          -0.478500068187714,
+          0.0,
+          -0.243339076638222
+        ]
+      },
+      "failures": [],
+      "forbidden_nodes": [],
+      "glb_sha256": "67A12BD98936173CB10659AC885AE27857A8EBE96F2B0EDD29B9A4C4D02DB534",
+      "godot_node_name_mapping": {},
+      "materials": 15,
+      "mesh_instances": 63,
+      "nodes": 73,
+      "packed_scene_root_name": "chr_f1_worker_pixel_v003",
+      "resource_path": "res://map/assets/models/units/faction_01/01_worker/chr_f1_worker_pixel_v003.glb",
+      "role_id": "01_worker",
+      "root_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "status": "PASS",
+      "surfaces": 63,
+      "unit_root_name": "UNIT_F1_WORKER_V003_ROOT"
+    },
+    {
+      "bounds_godot_xyz_m": {
+        "dimensions": [
+          1.42479985952377,
+          1.82499992847443,
+          0.562500014901161
+        ],
+        "maximum": [
+          0.572399914264679,
+          1.82499992847443,
+          0.392500013113022
+        ],
+        "minimum": [
+          -0.852399945259094,
+          0.0,
+          -0.170000001788139
+        ]
+      },
+      "failures": [],
+      "forbidden_nodes": [],
+      "glb_sha256": "458CF4248AF07B05C1880D7023BF50FD59D5C533E93637535652833381C39B5D",
+      "godot_node_name_mapping": {},
+      "materials": 12,
+      "mesh_instances": 57,
+      "nodes": 65,
+      "packed_scene_root_name": "chr_f1_sword_shield_pixel_v003",
+      "resource_path": "res://map/assets/models/units/faction_01/02_sword_shield/chr_f1_sword_shield_pixel_v003.glb",
+      "role_id": "02_sword_shield",
+      "root_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "status": "PASS",
+      "surfaces": 57,
+      "unit_root_name": "UNIT_F1_SWORD_SHIELD_V003_ROOT"
+    },
+    {
+      "bounds_godot_xyz_m": {
+        "dimensions": [
+          1.10893893241882,
+          2.50245261192322,
+          0.766184747219086
+        ],
+        "maximum": [
+          0.666348338127136,
+          2.50245261192322,
+          0.515907645225525
+        ],
+        "minimum": [
+          -0.442590594291687,
+          0.0,
+          -0.250277101993561
+        ]
+      },
+      "failures": [],
+      "forbidden_nodes": [],
+      "glb_sha256": "F969E8EC04F7BB2171070A34F6027F349B49408472254ABA3BAAFA649098D0F1",
+      "godot_node_name_mapping": {
+        "GRIP_PRIMARY.001": "GRIP_PRIMARY_001"
+      },
+      "materials": 12,
+      "mesh_instances": 61,
+      "nodes": 71,
+      "packed_scene_root_name": "chr_f1_spearman_pixel_v003",
+      "resource_path": "res://map/assets/models/units/faction_01/03_spearman/chr_f1_spearman_pixel_v003.glb",
+      "role_id": "03_spearman",
+      "root_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "status": "PASS",
+      "surfaces": 61,
+      "unit_root_name": "UNIT_F1_SPEARMAN_V003_ROOT"
+    },
+    {
+      "bounds_godot_xyz_m": {
+        "dimensions": [
+          1.69784307479858,
+          2.30017948150635,
+          0.591935202479362
+        ],
+        "maximum": [
+          0.989835858345032,
+          2.30017948150635,
+          0.361276984214783
+        ],
+        "minimum": [
+          -0.708007216453552,
+          0.0,
+          -0.23065821826458
+        ]
+      },
+      "failures": [],
+      "forbidden_nodes": [],
+      "glb_sha256": "1377E96936FD1D149AA5A82FB2857E568B3BBE37E89226F826BA45C453EEAAE9",
+      "godot_node_name_mapping": {},
+      "materials": 7,
+      "mesh_instances": 54,
+      "nodes": 61,
+      "packed_scene_root_name": "chr_f1_halberdier_pixel_v003",
+      "resource_path": "res://map/assets/models/units/faction_01/04_halberdier/chr_f1_halberdier_pixel_v003.glb",
+      "role_id": "04_halberdier",
+      "root_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "status": "PASS",
+      "surfaces": 54,
+      "unit_root_name": "UNIT_F1_HALBERDIER_V003_ROOT"
+    },
+    {
+      "bounds_godot_xyz_m": {
+        "dimensions": [
+          1.69366347789764,
+          4.04791688919067,
+          2.84156465530396
+        ],
+        "maximum": [
+          0.608911871910095,
+          4.04791688919067,
+          1.62799429893494
+        ],
+        "minimum": [
+          -1.08475160598755,
+          0.0,
+          -1.21357035636902
+        ]
+      },
+      "failures": [],
+      "forbidden_nodes": [],
+      "glb_sha256": "18CC6BAB2189E93A321CCCE52D42A6DBB5D655D9F8F4DFA539F4D98DEAE61664",
+      "godot_node_name_mapping": {},
+      "materials": 14,
+      "mesh_instances": 87,
+      "nodes": 100,
+      "packed_scene_root_name": "chr_f1_light_cavalry_pixel_v003",
+      "resource_path": "res://map/assets/models/units/faction_01/05_light_cavalry/chr_f1_light_cavalry_pixel_v003.glb",
+      "role_id": "05_light_cavalry",
+      "root_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "status": "PASS",
+      "surfaces": 87,
+      "unit_root_name": "UNIT_F1_LIGHT_CAVALRY_V003_ROOT"
+    },
+    {
+      "bounds_godot_xyz_m": {
+        "dimensions": [
+          1.22261244058609,
+          1.82499992847443,
+          0.400000005960464
+        ],
+        "maximum": [
+          0.645550608634949,
+          1.82499992847443,
+          0.219999998807907
+        ],
+        "minimum": [
+          -0.577061831951141,
+          0.0,
+          -0.180000007152557
+        ]
+      },
+      "failures": [],
+      "forbidden_nodes": [],
+      "glb_sha256": "3E38623AB7D74ABA49A31F372439891EE1413A2DB7798347438171117881BBFE",
+      "godot_node_name_mapping": {},
+      "materials": 11,
+      "mesh_instances": 81,
+      "nodes": 87,
+      "packed_scene_root_name": "chr_f1_heavy_infantry_pixel_v003",
+      "resource_path": "res://map/assets/models/units/faction_01/06_heavy_infantry/chr_f1_heavy_infantry_pixel_v003.glb",
+      "role_id": "06_heavy_infantry",
+      "root_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "status": "PASS",
+      "surfaces": 81,
+      "unit_root_name": "UNIT_F1_HEAVY_INFANTRY_V003_ROOT"
+    },
+    {
+      "bounds_godot_xyz_m": {
+        "dimensions": [
+          1.38147193193436,
+          3.05307674407959,
+          2.69845223426819
+        ],
+        "maximum": [
+          0.603681802749634,
+          3.05307674407959,
+          1.61500000953674
+        ],
+        "minimum": [
+          -0.777790129184723,
+          0.0,
+          -1.08345222473145
+        ]
+      },
+      "failures": [],
+      "forbidden_nodes": [],
+      "glb_sha256": "15BE68245F6C28C1211C6A75D19BAAF2B080CF395C3095FBEF6A72CE8C3A01C9",
+      "godot_node_name_mapping": {
+        "HUMAN_ROOT::SOCKET_HAND_L": "HUMAN_ROOT__SOCKET_HAND_L",
+        "HUMAN_ROOT::SOCKET_HAND_R": "HUMAN_ROOT__SOCKET_HAND_R",
+        "HUMAN_ROOT::SOCKET_RIDER_SEAT": "HUMAN_ROOT__SOCKET_RIDER_SEAT",
+        "HUMAN_ROOT::SOCKET_WAIST_L": "HUMAN_ROOT__SOCKET_WAIST_L",
+        "HUMAN_ROOT::SOCKET_WAIST_R": "HUMAN_ROOT__SOCKET_WAIST_R",
+        "TACK_ROOT::SOCKET_SADDLE": "TACK_ROOT__SOCKET_SADDLE",
+        "WPN_ARROW_ROOT::SOCKET_ARROW_NOCK": "WPN_ARROW_ROOT__SOCKET_ARROW_NOCK",
+        "WPN_BOW_ROOT::GRIP_PRIMARY": "WPN_BOW_ROOT__GRIP_PRIMARY",
+        "WPN_BOW_ROOT::GRIP_SECONDARY": "WPN_BOW_ROOT__GRIP_SECONDARY",
+        "WPN_KNIFE_ROOT::GRIP_PRIMARY": "WPN_KNIFE_ROOT__GRIP_PRIMARY"
+      },
+      "materials": 12,
+      "mesh_instances": 114,
+      "nodes": 132,
+      "packed_scene_root_name": "chr_f1_horse_archer_pixel_v003",
+      "resource_path": "res://map/assets/models/units/faction_01/07_horse_archer/chr_f1_horse_archer_pixel_v003.glb",
+      "role_id": "07_horse_archer",
+      "root_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "status": "PASS",
+      "surfaces": 114,
+      "unit_root_name": "UNIT_F1_HORSE_ARCHER_V003_ROOT"
+    },
+    {
+      "bounds_godot_xyz_m": {
+        "dimensions": [
+          1.87024945020676,
+          4.20388793945313,
+          3.48759758472443
+        ],
+        "maximum": [
+          0.914999961853027,
+          4.20388793945313,
+          2.02799391746521
+        ],
+        "minimum": [
+          -0.955249488353729,
+          0.0,
+          -1.45960366725922
+        ]
+      },
+      "failures": [],
+      "forbidden_nodes": [],
+      "glb_sha256": "1EA02C53CA81EAA9D3238307FD51987A84B764AF988D769E5B29365CDEFFF232",
+      "godot_node_name_mapping": {},
+      "materials": 11,
+      "mesh_instances": 117,
+      "nodes": 130,
+      "packed_scene_root_name": "chr_f1_heavy_cavalry_pixel_v003",
+      "resource_path": "res://map/assets/models/units/faction_01/08_heavy_cavalry/chr_f1_heavy_cavalry_pixel_v003.glb",
+      "role_id": "08_heavy_cavalry",
+      "root_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "status": "PASS",
+      "surfaces": 117,
+      "unit_root_name": "UNIT_F1_HEAVY_CAVALRY_V003_ROOT"
+    },
+    {
+      "bounds_godot_xyz_m": {
+        "dimensions": [
+          0.696784406900406,
+          2.09999990463257,
+          1.80250012874603
+        ],
+        "maximum": [
+          0.390784412622452,
+          2.09999990463257,
+          1.50000011920929
+        ],
+        "minimum": [
+          -0.305999994277954,
+          0.0,
+          -0.302500009536743
+        ]
+      },
+      "failures": [],
+      "forbidden_nodes": [],
+      "glb_sha256": "577849C6F8AB2E404F26362632EB5228E52D842E22418482FDF2959F6D2730F7",
+      "godot_node_name_mapping": {},
+      "materials": 14,
+      "mesh_instances": 72,
+      "nodes": 92,
+      "packed_scene_root_name": "chr_f1_archer_pixel_v005",
+      "resource_path": "res://map/assets/models/units/faction_01/09_archer/chr_f1_archer_pixel_v005.glb",
+      "role_id": "09_archer",
+      "root_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "status": "PASS",
+      "surfaces": 72,
+      "unit_root_name": "UNIT_F1_ARCHER_V005_ROOT"
+    },
+    {
+      "bounds_godot_xyz_m": {
+        "dimensions": [
+          1.31035774946213,
+          1.82499992847443,
+          1.02940629422665
+        ],
+        "maximum": [
+          0.699785888195038,
+          1.82499992847443,
+          0.831064701080322
+        ],
+        "minimum": [
+          -0.61057186126709,
+          0.0,
+          -0.198341593146324
+        ]
+      },
+      "failures": [],
+      "forbidden_nodes": [],
+      "glb_sha256": "C2F0A9DFAE4F50F77C2E56455944BD2279DDA4970EEBFDEF90B097AEE24CABA3",
+      "godot_node_name_mapping": {},
+      "materials": 11,
+      "mesh_instances": 78,
+      "nodes": 90,
+      "packed_scene_root_name": "chr_f1_crossbowman_pixel_v003",
+      "resource_path": "res://map/assets/models/units/faction_01/10_crossbowman/chr_f1_crossbowman_pixel_v003.glb",
+      "role_id": "10_crossbowman",
+      "root_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "status": "PASS",
+      "surfaces": 78,
+      "unit_root_name": "UNIT_F1_CROSSBOWMAN_V003_ROOT"
+    },
+    {
+      "bounds_godot_xyz_m": {
+        "dimensions": [
+          0.946760833263397,
+          1.95010364055634,
+          0.709805816411972
+        ],
+        "maximum": [
+          0.488119184970856,
+          1.95010364055634,
+          0.330393552780151
+        ],
+        "minimum": [
+          -0.458641648292542,
+          0.0,
+          -0.379412263631821
+        ]
+      },
+      "failures": [],
+      "forbidden_nodes": [],
+      "glb_sha256": "DFA954EFFA5A6E445B9CF2B614E2D4B652F46A6EA7682FC62C47353971D9BB4E",
+      "godot_node_name_mapping": {},
+      "materials": 14,
+      "mesh_instances": 59,
+      "nodes": 73,
+      "packed_scene_root_name": "chr_f1_scout_pixel_v003",
+      "resource_path": "res://map/assets/models/units/faction_01/11_scout/chr_f1_scout_pixel_v003.glb",
+      "role_id": "11_scout",
+      "root_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "status": "PASS",
+      "surfaces": 59,
+      "unit_root_name": "UNIT_F1_SCOUT_V003_ROOT"
+    },
+    {
+      "bounds_godot_xyz_m": {
+        "dimensions": [
+          1.02604192495346,
+          1.83999991416931,
+          0.473996341228485
+        ],
+        "maximum": [
+          0.458641588687897,
+          1.83999991416931,
+          0.274269461631775
+        ],
+        "minimum": [
+          -0.567400336265564,
+          0.0,
+          -0.19972687959671
+        ]
+      },
+      "failures": [],
+      "forbidden_nodes": [],
+      "glb_sha256": "D57A9E8A1732F8DF21B3ABBDB142BCAA03E31C4A0EDB94799972B88AA788705E",
+      "godot_node_name_mapping": {},
+      "materials": 9,
+      "mesh_instances": 60,
+      "nodes": 71,
+      "packed_scene_root_name": "chr_f1_marine_pixel_v003",
+      "resource_path": "res://map/assets/models/units/faction_01/12_marine/chr_f1_marine_pixel_v003.glb",
+      "role_id": "12_marine",
+      "root_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "status": "PASS",
+      "surfaces": 60,
+      "unit_root_name": "UNIT_F1_MARINE_V003_ROOT"
+    }
+  ],
+  "failures": [],
+  "godot_version": "4.7.1-stable (official)",
+  "renderer_contract": "Mobile",
+  "schema_version": 1,
+  "status": "PASS",
+  "validation_context": {
+    "kind": "isolated Godot import project",
+    "reason": "The target project scans offline .blend sources while its Blender importer path is unset; the isolated project removes that unrelated importer error.",
+    "resource_paths_match_target_project": true
+  }
+}
