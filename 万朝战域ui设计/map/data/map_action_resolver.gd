@@ -81,8 +81,9 @@ func _actions_for_city(ctx: MapInteractionContext) -> Array[MapInteractionAction
 		# 中央主城：无论归属关系，均提供"查看"
 		actions.append(_make(MapActionConstants.ACTION_VIEW, ctx))
 		if rel == DemoPlayerContext.FactionRelation.FRIENDLY:
-			# 己方控制中央主城：可升级
+			# 己方控制中央主城：可升级、出兵
 			actions.append(_make(MapActionConstants.ACTION_UPGRADE, ctx))
+			actions.append(_make(MapActionConstants.ACTION_DEPLOY, ctx))
 		else:
 			# 非己方控制中央主城：可夺取（独立于资源点占领）
 			actions.append(_make(MapActionConstants.ACTION_CAPTURE_CAPITAL, ctx))
@@ -90,9 +91,10 @@ func _actions_for_city(ctx: MapInteractionContext) -> Array[MapInteractionAction
 		# 阵营主城
 		match rel:
 			DemoPlayerContext.FactionRelation.FRIENDLY:
-				# 己方主城：查看 + 升级
+				# 己方主城：查看 + 升级 + 出兵
 				actions.append(_make(MapActionConstants.ACTION_VIEW, ctx))
 				actions.append(_make(MapActionConstants.ACTION_UPGRADE, ctx))
+				actions.append(_make(MapActionConstants.ACTION_DEPLOY, ctx))
 			_:
 				# 敌方/中立主城：攻打 + 查看（不显示占领/侦察/升级）
 				actions.append(_make(MapActionConstants.ACTION_ATTACK, ctx))

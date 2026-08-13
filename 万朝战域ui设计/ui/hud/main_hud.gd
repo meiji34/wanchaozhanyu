@@ -46,6 +46,8 @@ var _interaction_panel: MapInteractionPanel
 var _action_resolver: MapActionResolver
 var _interaction_service: DemoInteractionService
 var _player_context: DemoPlayerContext
+var _deployment_panel: DeploymentPanel
+var _deployment_service: DemoDeploymentService
 
 # 功能页面本地覆盖层（避免通过 NavigationManager 重新加载主场景）
 var _feature_page_container: Control
@@ -68,6 +70,8 @@ func _ready() -> void:
 	_action_resolver.set_player_context(_player_context)
 	_action_resolver.set_demo_mode(true)
 	_interaction_service = DemoInteractionService.new()
+	_deployment_service = DemoDeploymentService.new()
+	_deployment_service.configure(MockData.get_resources, MockData.submit_deployment, _get_current_faction_id)
 
 	# 阵营切换时刷新当前行动
 	_player_context.faction_changed.connect(_on_player_faction_changed)
@@ -131,6 +135,7 @@ func _build_ui() -> void:
 	_build_more_panel(overlay)
 	_build_selection_panel(overlay)
 	_build_interaction_panel(overlay)
+	_build_deployment_panel(overlay)
 	_build_construction_panel(overlay)
 	_build_feature_page_container(overlay)
 
@@ -292,11 +297,20 @@ func _build_interaction_panel(parent: Control) -> void:
 	_interaction_panel.name = "MapInteractionPanel"
 	_interaction_panel.configure(_action_resolver, _interaction_service)
 	_interaction_panel.panel_closed.connect(_on_interaction_panel_closed)
+	_interaction_panel.action_executed.connect(_on_map_action_executed)
 	# 删除建筑走真实业务链路：桥接层 → MapArea → MapWorld → MapBuildingManager
 	_interaction_service.set_delete_building_handler(Callable(_map_area, "request_delete_building"))
 	# 路线预览走真实业务链路：桥接层 → MapArea → MapWorld（寻路 + 格子高亮）
 	_interaction_service.set_route_preview_handler(Callable(_map_area, "request_route_preview"))
 	parent.add_child(_interaction_panel)
+
+
+func _build_deployment_panel(parent: Control) -> void:
+	_deployment_panel = DeploymentPanel.new()
+	_deployment_panel.name = "DeploymentPanel"
+	_deployment_panel.configure(_deployment_service)
+	_deployment_panel.panel_closed.connect(_on_deployment_panel_closed)
+	parent.add_child(_deployment_panel)
 
 
 ## 建造模式面板：标题 + 合法性提示 + 确认/取消，样式复用 UIBuilder 与现有弹层规范
@@ -413,6 +427,8 @@ func _apply_responsive_layout() -> void:
 		_selection_panel.offset_right = drawer_width * 0.5
 	if _interaction_panel != null:
 		_interaction_panel._apply_responsive_layout()
+	if _deployment_panel != null:
+		_deployment_panel.apply_responsive_layout(get_viewport_rect().size)
 
 
 func _toggle_task_drawer() -> void:
@@ -483,6 +499,8 @@ func _on_selected_server_changed(_server: Dictionary) -> void:
 
 func _on_map_selection_changed(selection: Dictionary) -> void:
 	_current_selection = selection.duplicate(true)
+	if _deployment_panel != null and _deployment_panel.visible:
+		_deployment_panel.hide_panel()
 	# 不再显示底层 _selection_panel，统一由 MapInteractionPanel 显示所有信息
 	# 构建统一交互上下文并显示行动菜单
 	var ctx: MapInteractionContext = _build_interaction_context(selection)
@@ -495,10 +513,27 @@ func _on_map_selection_cleared() -> void:
 	_selection_panel.visible = false
 	if _interaction_panel != null:
 		_interaction_panel.hide_panel()
+	if _deployment_panel != null and _deployment_panel.visible:
+		_deployment_panel.hide_panel()
 
 
 func _on_interaction_panel_closed() -> void:
 	pass  # 面板已关闭，其他无需联动
+
+
+func _on_map_action_executed(action: MapInteractionAction) -> void:
+	if action.action_id != MapActionConstants.ACTION_DEPLOY or _deployment_panel == null:
+		return
+	var context := _interaction_panel.get_current_context()
+	if context == null:
+		return
+	_interaction_panel.visible = false
+	_deployment_panel.show_for_city(context)
+
+
+func _on_deployment_panel_closed() -> void:
+	if _interaction_panel != null and _interaction_panel.get_current_context() != null:
+		_interaction_panel.visible = true
 
 
 func _on_player_faction_changed(_previous: StringName, current: StringName) -> void:
@@ -507,8 +542,14 @@ func _on_player_faction_changed(_previous: StringName, current: StringName) -> v
 		_interaction_panel.refresh_actions()
 
 
+func _get_current_faction_id() -> int:
+	return _player_context.current_faction_id
+
+
 func _on_player_faction_id_changed(_previous_faction_id: int, _current_faction_id: int) -> void:
 	## 阵营 ID 变更时刷新交互面板（确保主城敌我判断等正确更新）
+	if _deployment_panel != null and _deployment_panel.visible:
+		_deployment_panel.hide_panel()
 	if _interaction_panel != null and _interaction_panel.get_current_context() != null:
 		_interaction_panel.refresh_actions()
 

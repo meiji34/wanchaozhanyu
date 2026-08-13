@@ -16,6 +16,7 @@ const ACTION_OCCUPY: StringName = &"occupy"            ## 资源点占领（铁�
 const ACTION_CAPTURE_CAPITAL: StringName = &"capture_capital"  ## 中央主城夺取（独立于资源点占领）
 const ACTION_UPGRADE: StringName = &"upgrade"
 const ACTION_DELETE_BUILDING: StringName = &"delete_building"  ## 删除己方已建造建筑（仅普通玩家建筑）
+const ACTION_DEPLOY: StringName = &"deploy"                    ## 从己方城池编成并派出部队
 
 enum ActionCategory {
 	INFO,       ## 查看类
@@ -69,6 +70,8 @@ static func get_action_display_name(action_id: StringName) -> String:
 			return "升级"
 		ACTION_DELETE_BUILDING:
 			return "删除"
+		ACTION_DEPLOY:
+			return "出兵"
 		_:
 			return str(action_id)
 
@@ -79,7 +82,7 @@ static func get_action_category(action_id: StringName) -> int:
 			return ActionCategory.INFO
 		ACTION_HARVEST, ACTION_OCCUPY:
 			return ActionCategory.RESOURCE
-		ACTION_ATTACK, ACTION_CAPTURE_CAPITAL:
+		ACTION_ATTACK, ACTION_CAPTURE_CAPITAL, ACTION_DEPLOY:
 			return ActionCategory.COMBAT
 		ACTION_SCOUT, ACTION_MARK, ACTION_RETURN_TO_CITY:
 			return ActionCategory.STRATEGY

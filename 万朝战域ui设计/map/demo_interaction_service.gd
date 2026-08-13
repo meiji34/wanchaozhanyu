@@ -55,6 +55,8 @@ func execute(action: MapInteractionAction) -> Dictionary:
 			return _mock_upgrade(action)
 		MapActionConstants.ACTION_VIEW:
 			return _mock_view(action)
+		MapActionConstants.ACTION_DEPLOY:
+			return _open_deployment(action)
 		_:
 			return _result(false, "Demo 桥接层未识别行动：%s" % action.action_id)
 
@@ -139,6 +141,10 @@ func _mock_upgrade(_action: MapInteractionAction) -> Dictionary:
 func _mock_view(action: MapInteractionAction) -> Dictionary:
 	var ctx_name: String = str(action.metadata.get("raw_snapshot", {}).get("name", "目标"))
 	return _result(true, "[Demo] 正在查看「%s」的详细信息。" % ctx_name)
+
+
+func _open_deployment(action: MapInteractionAction) -> Dictionary:
+	return _result(true, "正在打开「%s」出兵编成。" % str(action.metadata.get("raw_snapshot", {}).get("name", "城池")))
 
 
 func _result(success: bool, message: String) -> Dictionary:
