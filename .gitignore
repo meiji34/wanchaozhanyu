@@ -30,4 +30,4 @@ tools/
 .godot-mcp/
 
 # ===== 临时文件 =====
-万朝战域ui设计/tests/
+万朝战域ui设计/tests/_*.gd*
