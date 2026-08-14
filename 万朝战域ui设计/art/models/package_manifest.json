@@ -1,0 +1,1023 @@
+{
+  "assets": [
+    {
+      "display_name_zh": "工人",
+      "godot": {
+        "materials": 15,
+        "mesh_instances": 63,
+        "node_name_mapping": {},
+        "nodes": 73,
+        "packed_scene_root_name": "chr_f1_worker_pixel_v003",
+        "surfaces": 63,
+        "unit_root_name": "UNIT_F1_WORKER_V003_ROOT"
+      },
+      "legacy_aliases": [],
+      "order": 1,
+      "role_id": "01_worker",
+      "runtime": {
+        "bytes": 197860,
+        "format": "glTF 2.0 Binary (.glb)",
+        "import_sidecar": "map/assets/models/units/faction_01/01_worker/chr_f1_worker_pixel_v003.glb.import",
+        "path": "map/assets/models/units/faction_01/01_worker/chr_f1_worker_pixel_v003.glb",
+        "resource_path": "res://map/assets/models/units/faction_01/01_worker/chr_f1_worker_pixel_v003.glb",
+        "sha256": "67A12BD98936173CB10659AC885AE27857A8EBE96F2B0EDD29B9A4C4D02DB534",
+        "unit_root": "UNIT_F1_WORKER_V003_ROOT"
+      },
+      "source": {
+        "format": "Blender .blend",
+        "path": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/01_worker/worker_v003.blend",
+        "sha256": "F639D350EE107C9215E83DEA4CA621A615E252F1DB3ABA2DCC4E2513C86FFD5D"
+      },
+      "statistics": {
+        "godot_bounds_xyz_m": {
+          "dimensions": [
+            0.99983537197113,
+            1.77852487564087,
+            0.514499559998512
+          ],
+          "maximum": [
+            0.521335303783417,
+            1.77852487564087,
+            0.271160483360291
+          ],
+          "minimum": [
+            -0.478500068187714,
+            0.0,
+            -0.243339076638222
+          ]
+        },
+        "materials": 15,
+        "runtime_geometry_nodes": 63,
+        "semantic_empty_nodes": 10,
+        "source_bounds_xyz_m": {
+          "dimensions_xyz_m": [
+            0.999835,
+            0.5145,
+            1.778525
+          ],
+          "maximum_xyz_m": [
+            0.521335,
+            0.243339,
+            1.778525
+          ],
+          "minimum_xyz_m": [
+            -0.4785,
+            -0.27116,
+            0.0
+          ]
+        },
+        "source_curve_objects": 0,
+        "source_mesh_objects": 63,
+        "triangles": 2252
+      },
+      "validation": {
+        "blender_clean_roundtrip": "PASS",
+        "blender_export": "PASS",
+        "godot_4_7_1_import_and_instantiate": "PASS",
+        "source_audit": "PASS"
+      },
+      "version": "v003"
+    },
+    {
+      "display_name_zh": "刀盾兵",
+      "godot": {
+        "materials": 12,
+        "mesh_instances": 57,
+        "node_name_mapping": {},
+        "nodes": 65,
+        "packed_scene_root_name": "chr_f1_sword_shield_pixel_v003",
+        "surfaces": 57,
+        "unit_root_name": "UNIT_F1_SWORD_SHIELD_V003_ROOT"
+      },
+      "legacy_aliases": [],
+      "order": 2,
+      "role_id": "02_sword_shield",
+      "runtime": {
+        "bytes": 161804,
+        "format": "glTF 2.0 Binary (.glb)",
+        "import_sidecar": "map/assets/models/units/faction_01/02_sword_shield/chr_f1_sword_shield_pixel_v003.glb.import",
+        "path": "map/assets/models/units/faction_01/02_sword_shield/chr_f1_sword_shield_pixel_v003.glb",
+        "resource_path": "res://map/assets/models/units/faction_01/02_sword_shield/chr_f1_sword_shield_pixel_v003.glb",
+        "sha256": "458CF4248AF07B05C1880D7023BF50FD59D5C533E93637535652833381C39B5D",
+        "unit_root": "UNIT_F1_SWORD_SHIELD_V003_ROOT"
+      },
+      "source": {
+        "format": "Blender .blend",
+        "path": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/02_sword_shield/sword_shield_v003.blend",
+        "sha256": "67FD97B52E3E9BADE324182B2BA5318F4E6C5893E08BD2F5FBF4E82796143603"
+      },
+      "statistics": {
+        "godot_bounds_xyz_m": {
+          "dimensions": [
+            1.42479985952377,
+            1.82499992847443,
+            0.562500014901161
+          ],
+          "maximum": [
+            0.572399914264679,
+            1.82499992847443,
+            0.392500013113022
+          ],
+          "minimum": [
+            -0.852399945259094,
+            0.0,
+            -0.170000001788139
+          ]
+        },
+        "materials": 12,
+        "runtime_geometry_nodes": 57,
+        "semantic_empty_nodes": 8,
+        "source_bounds_xyz_m": {
+          "dimensions_xyz_m": [
+            1.4248,
+            0.5625,
+            1.825
+          ],
+          "maximum_xyz_m": [
+            0.5724,
+            0.17,
+            1.825
+          ],
+          "minimum_xyz_m": [
+            -0.8524,
+            -0.3925,
+            0.0
+          ]
+        },
+        "source_curve_objects": 0,
+        "source_mesh_objects": 57,
+        "triangles": 1692
+      },
+      "validation": {
+        "blender_clean_roundtrip": "PASS",
+        "blender_export": "PASS",
+        "godot_4_7_1_import_and_instantiate": "PASS",
+        "source_audit": "PASS"
+      },
+      "version": "v003"
+    },
+    {
+      "display_name_zh": "长枪兵",
+      "godot": {
+        "materials": 12,
+        "mesh_instances": 61,
+        "node_name_mapping": {
+          "GRIP_PRIMARY.001": "GRIP_PRIMARY_001"
+        },
+        "nodes": 71,
+        "packed_scene_root_name": "chr_f1_spearman_pixel_v003",
+        "surfaces": 61,
+        "unit_root_name": "UNIT_F1_SPEARMAN_V003_ROOT"
+      },
+      "legacy_aliases": [],
+      "order": 3,
+      "role_id": "03_spearman",
+      "runtime": {
+        "bytes": 138748,
+        "format": "glTF 2.0 Binary (.glb)",
+        "import_sidecar": "map/assets/models/units/faction_01/03_spearman/chr_f1_spearman_pixel_v003.glb.import",
+        "path": "map/assets/models/units/faction_01/03_spearman/chr_f1_spearman_pixel_v003.glb",
+        "resource_path": "res://map/assets/models/units/faction_01/03_spearman/chr_f1_spearman_pixel_v003.glb",
+        "sha256": "F969E8EC04F7BB2171070A34F6027F349B49408472254ABA3BAAFA649098D0F1",
+        "unit_root": "UNIT_F1_SPEARMAN_V003_ROOT"
+      },
+      "source": {
+        "format": "Blender .blend",
+        "path": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/03_spearman/spearman_v003.blend",
+        "sha256": "EAA7CCF7FE7FC3478795BE5C3C9C35CB36CCE15CC606481BA24602141821E747"
+      },
+      "statistics": {
+        "godot_bounds_xyz_m": {
+          "dimensions": [
+            1.10893893241882,
+            2.50245261192322,
+            0.766184747219086
+          ],
+          "maximum": [
+            0.666348338127136,
+            2.50245261192322,
+            0.515907645225525
+          ],
+          "minimum": [
+            -0.442590594291687,
+            0.0,
+            -0.250277101993561
+          ]
+        },
+        "materials": 12,
+        "runtime_geometry_nodes": 61,
+        "semantic_empty_nodes": 10,
+        "source_bounds_xyz_m": {
+          "dimensions_xyz_m": [
+            1.015643,
+            0.721243,
+            2.473042
+          ],
+          "maximum_xyz_m": [
+            0.65773,
+            0.224361,
+            2.473042
+          ],
+          "minimum_xyz_m": [
+            -0.357913,
+            -0.496882,
+            0.0
+          ]
+        },
+        "source_curve_objects": 0,
+        "source_mesh_objects": 61,
+        "triangles": 1206
+      },
+      "validation": {
+        "blender_clean_roundtrip": "PASS",
+        "blender_export": "PASS",
+        "godot_4_7_1_import_and_instantiate": "PASS",
+        "source_audit": "PASS"
+      },
+      "version": "v003"
+    },
+    {
+      "display_name_zh": "戟兵",
+      "godot": {
+        "materials": 7,
+        "mesh_instances": 54,
+        "node_name_mapping": {},
+        "nodes": 61,
+        "packed_scene_root_name": "chr_f1_halberdier_pixel_v003",
+        "surfaces": 54,
+        "unit_root_name": "UNIT_F1_HALBERDIER_V003_ROOT"
+      },
+      "legacy_aliases": [],
+      "order": 4,
+      "role_id": "04_halberdier",
+      "runtime": {
+        "bytes": 200164,
+        "format": "glTF 2.0 Binary (.glb)",
+        "import_sidecar": "map/assets/models/units/faction_01/04_halberdier/chr_f1_halberdier_pixel_v003.glb.import",
+        "path": "map/assets/models/units/faction_01/04_halberdier/chr_f1_halberdier_pixel_v003.glb",
+        "resource_path": "res://map/assets/models/units/faction_01/04_halberdier/chr_f1_halberdier_pixel_v003.glb",
+        "sha256": "1377E96936FD1D149AA5A82FB2857E568B3BBE37E89226F826BA45C453EEAAE9",
+        "unit_root": "UNIT_F1_HALBERDIER_V003_ROOT"
+      },
+      "source": {
+        "format": "Blender .blend",
+        "path": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/04_halberdier/halberdier_v003.blend",
+        "sha256": "33F14E4D9E06B7A98B1525DB5EA125CB1633B508844C052D919C667DFC644615"
+      },
+      "statistics": {
+        "godot_bounds_xyz_m": {
+          "dimensions": [
+            1.69784307479858,
+            2.30017948150635,
+            0.591935202479362
+          ],
+          "maximum": [
+            0.989835858345032,
+            2.30017948150635,
+            0.361276984214783
+          ],
+          "minimum": [
+            -0.708007216453552,
+            0.0,
+            -0.23065821826458
+          ]
+        },
+        "materials": 7,
+        "runtime_geometry_nodes": 54,
+        "semantic_empty_nodes": 7,
+        "source_bounds_xyz_m": {
+          "dimensions_xyz_m": [
+            1.697843,
+            0.591935,
+            2.300179
+          ],
+          "maximum_xyz_m": [
+            0.989836,
+            0.230658,
+            2.300179
+          ],
+          "minimum_xyz_m": [
+            -0.708007,
+            -0.361277,
+            0.0
+          ]
+        },
+        "source_curve_objects": 0,
+        "source_mesh_objects": 54,
+        "triangles": 2416
+      },
+      "validation": {
+        "blender_clean_roundtrip": "PASS",
+        "blender_export": "PASS",
+        "godot_4_7_1_import_and_instantiate": "PASS",
+        "source_audit": "PASS"
+      },
+      "version": "v003"
+    },
+    {
+      "display_name_zh": "轻骑兵",
+      "godot": {
+        "materials": 14,
+        "mesh_instances": 87,
+        "node_name_mapping": {},
+        "nodes": 100,
+        "packed_scene_root_name": "chr_f1_light_cavalry_pixel_v003",
+        "surfaces": 87,
+        "unit_root_name": "UNIT_F1_LIGHT_CAVALRY_V003_ROOT"
+      },
+      "legacy_aliases": [],
+      "order": 5,
+      "role_id": "05_light_cavalry",
+      "runtime": {
+        "bytes": 290848,
+        "format": "glTF 2.0 Binary (.glb)",
+        "import_sidecar": "map/assets/models/units/faction_01/05_light_cavalry/chr_f1_light_cavalry_pixel_v003.glb.import",
+        "path": "map/assets/models/units/faction_01/05_light_cavalry/chr_f1_light_cavalry_pixel_v003.glb",
+        "resource_path": "res://map/assets/models/units/faction_01/05_light_cavalry/chr_f1_light_cavalry_pixel_v003.glb",
+        "sha256": "18CC6BAB2189E93A321CCCE52D42A6DBB5D655D9F8F4DFA539F4D98DEAE61664",
+        "unit_root": "UNIT_F1_LIGHT_CAVALRY_V003_ROOT"
+      },
+      "source": {
+        "format": "Blender .blend",
+        "path": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/05_light_cavalry/light_cavalry_v003.blend",
+        "sha256": "D4C2695DEAD4CA2291998F7E43745EEA74904A3455AFD5FD0776E853020F6410"
+      },
+      "statistics": {
+        "godot_bounds_xyz_m": {
+          "dimensions": [
+            1.69366347789764,
+            4.04791688919067,
+            2.84156465530396
+          ],
+          "maximum": [
+            0.608911871910095,
+            4.04791688919067,
+            1.62799429893494
+          ],
+          "minimum": [
+            -1.08475160598755,
+            0.0,
+            -1.21357035636902
+          ]
+        },
+        "materials": 14,
+        "runtime_geometry_nodes": 87,
+        "semantic_empty_nodes": 13,
+        "source_bounds_xyz_m": {
+          "dimensions_xyz_m": [
+            1.693663,
+            2.841565,
+            4.047917
+          ],
+          "maximum_xyz_m": [
+            0.608912,
+            1.21357,
+            4.047917
+          ],
+          "minimum_xyz_m": [
+            -1.084752,
+            -1.627994,
+            0.0
+          ]
+        },
+        "source_curve_objects": 0,
+        "source_mesh_objects": 87,
+        "triangles": 3040
+      },
+      "validation": {
+        "blender_clean_roundtrip": "PASS",
+        "blender_export": "PASS",
+        "godot_4_7_1_import_and_instantiate": "PASS",
+        "source_audit": "PASS_WITH_WARNINGS"
+      },
+      "version": "v003"
+    },
+    {
+      "display_name_zh": "重甲兵",
+      "godot": {
+        "materials": 11,
+        "mesh_instances": 81,
+        "node_name_mapping": {},
+        "nodes": 87,
+        "packed_scene_root_name": "chr_f1_heavy_infantry_pixel_v003",
+        "surfaces": 81,
+        "unit_root_name": "UNIT_F1_HEAVY_INFANTRY_V003_ROOT"
+      },
+      "legacy_aliases": [],
+      "order": 6,
+      "role_id": "06_heavy_infantry",
+      "runtime": {
+        "bytes": 167100,
+        "format": "glTF 2.0 Binary (.glb)",
+        "import_sidecar": "map/assets/models/units/faction_01/06_heavy_infantry/chr_f1_heavy_infantry_pixel_v003.glb.import",
+        "path": "map/assets/models/units/faction_01/06_heavy_infantry/chr_f1_heavy_infantry_pixel_v003.glb",
+        "resource_path": "res://map/assets/models/units/faction_01/06_heavy_infantry/chr_f1_heavy_infantry_pixel_v003.glb",
+        "sha256": "3E38623AB7D74ABA49A31F372439891EE1413A2DB7798347438171117881BBFE",
+        "unit_root": "UNIT_F1_HEAVY_INFANTRY_V003_ROOT"
+      },
+      "source": {
+        "format": "Blender .blend",
+        "path": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/06_heavy_infantry/heavy_infantry_v003.blend",
+        "sha256": "D66EEFDF6ABCD9D48B633323A1D05D5EF5E6BAB4367207F13D91597DC503F8ED"
+      },
+      "statistics": {
+        "godot_bounds_xyz_m": {
+          "dimensions": [
+            1.22261244058609,
+            1.82499992847443,
+            0.400000005960464
+          ],
+          "maximum": [
+            0.645550608634949,
+            1.82499992847443,
+            0.219999998807907
+          ],
+          "minimum": [
+            -0.577061831951141,
+            0.0,
+            -0.180000007152557
+          ]
+        },
+        "materials": 11,
+        "runtime_geometry_nodes": 81,
+        "semantic_empty_nodes": 6,
+        "source_bounds_xyz_m": {
+          "dimensions_xyz_m": [
+            1.211351,
+            0.4,
+            1.825
+          ],
+          "maximum_xyz_m": [
+            0.645551,
+            0.18,
+            1.825
+          ],
+          "minimum_xyz_m": [
+            -0.5658,
+            -0.22,
+            0.0
+          ]
+        },
+        "source_curve_objects": 0,
+        "source_mesh_objects": 81,
+        "triangles": 1696
+      },
+      "validation": {
+        "blender_clean_roundtrip": "PASS",
+        "blender_export": "PASS",
+        "godot_4_7_1_import_and_instantiate": "PASS",
+        "source_audit": "PASS"
+      },
+      "version": "v003"
+    },
+    {
+      "display_name_zh": "骑射手",
+      "godot": {
+        "materials": 12,
+        "mesh_instances": 114,
+        "node_name_mapping": {
+          "HUMAN_ROOT::SOCKET_HAND_L": "HUMAN_ROOT__SOCKET_HAND_L",
+          "HUMAN_ROOT::SOCKET_HAND_R": "HUMAN_ROOT__SOCKET_HAND_R",
+          "HUMAN_ROOT::SOCKET_RIDER_SEAT": "HUMAN_ROOT__SOCKET_RIDER_SEAT",
+          "HUMAN_ROOT::SOCKET_WAIST_L": "HUMAN_ROOT__SOCKET_WAIST_L",
+          "HUMAN_ROOT::SOCKET_WAIST_R": "HUMAN_ROOT__SOCKET_WAIST_R",
+          "TACK_ROOT::SOCKET_SADDLE": "TACK_ROOT__SOCKET_SADDLE",
+          "WPN_ARROW_ROOT::SOCKET_ARROW_NOCK": "WPN_ARROW_ROOT__SOCKET_ARROW_NOCK",
+          "WPN_BOW_ROOT::GRIP_PRIMARY": "WPN_BOW_ROOT__GRIP_PRIMARY",
+          "WPN_BOW_ROOT::GRIP_SECONDARY": "WPN_BOW_ROOT__GRIP_SECONDARY",
+          "WPN_KNIFE_ROOT::GRIP_PRIMARY": "WPN_KNIFE_ROOT__GRIP_PRIMARY"
+        },
+        "nodes": 132,
+        "packed_scene_root_name": "chr_f1_horse_archer_pixel_v003",
+        "surfaces": 114,
+        "unit_root_name": "UNIT_F1_HORSE_ARCHER_V003_ROOT"
+      },
+      "legacy_aliases": [],
+      "order": 7,
+      "role_id": "07_horse_archer",
+      "runtime": {
+        "bytes": 252300,
+        "format": "glTF 2.0 Binary (.glb)",
+        "import_sidecar": "map/assets/models/units/faction_01/07_horse_archer/chr_f1_horse_archer_pixel_v003.glb.import",
+        "path": "map/assets/models/units/faction_01/07_horse_archer/chr_f1_horse_archer_pixel_v003.glb",
+        "resource_path": "res://map/assets/models/units/faction_01/07_horse_archer/chr_f1_horse_archer_pixel_v003.glb",
+        "sha256": "15BE68245F6C28C1211C6A75D19BAAF2B080CF395C3095FBEF6A72CE8C3A01C9",
+        "unit_root": "UNIT_F1_HORSE_ARCHER_V003_ROOT"
+      },
+      "source": {
+        "format": "Blender .blend",
+        "path": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/07_horse_archer/horse_archer_v003.blend",
+        "sha256": "5C1DFE9D49D2BE95F296FA21B6BEA7B8FDEEFB7724CDA8460EC1648DB6EB2654"
+      },
+      "statistics": {
+        "godot_bounds_xyz_m": {
+          "dimensions": [
+            1.38147193193436,
+            3.05307674407959,
+            2.69845223426819
+          ],
+          "maximum": [
+            0.603681802749634,
+            3.05307674407959,
+            1.61500000953674
+          ],
+          "minimum": [
+            -0.777790129184723,
+            0.0,
+            -1.08345222473145
+          ]
+        },
+        "materials": 12,
+        "runtime_geometry_nodes": 114,
+        "semantic_empty_nodes": 18,
+        "source_bounds_xyz_m": {
+          "dimensions_xyz_m": [
+            1.381472,
+            2.698452,
+            3.053077
+          ],
+          "maximum_xyz_m": [
+            0.603682,
+            1.083452,
+            3.053077
+          ],
+          "minimum_xyz_m": [
+            -0.77779,
+            -1.615,
+            0.0
+          ]
+        },
+        "source_curve_objects": 0,
+        "source_mesh_objects": 114,
+        "triangles": 2356
+      },
+      "validation": {
+        "blender_clean_roundtrip": "PASS",
+        "blender_export": "PASS",
+        "godot_4_7_1_import_and_instantiate": "PASS",
+        "source_audit": "PASS"
+      },
+      "version": "v003"
+    },
+    {
+      "display_name_zh": "重骑兵",
+      "godot": {
+        "materials": 11,
+        "mesh_instances": 117,
+        "node_name_mapping": {},
+        "nodes": 130,
+        "packed_scene_root_name": "chr_f1_heavy_cavalry_pixel_v003",
+        "surfaces": 117,
+        "unit_root_name": "UNIT_F1_HEAVY_CAVALRY_V003_ROOT"
+      },
+      "legacy_aliases": [],
+      "order": 8,
+      "role_id": "08_heavy_cavalry",
+      "runtime": {
+        "bytes": 317044,
+        "format": "glTF 2.0 Binary (.glb)",
+        "import_sidecar": "map/assets/models/units/faction_01/08_heavy_cavalry/chr_f1_heavy_cavalry_pixel_v003.glb.import",
+        "path": "map/assets/models/units/faction_01/08_heavy_cavalry/chr_f1_heavy_cavalry_pixel_v003.glb",
+        "resource_path": "res://map/assets/models/units/faction_01/08_heavy_cavalry/chr_f1_heavy_cavalry_pixel_v003.glb",
+        "sha256": "1EA02C53CA81EAA9D3238307FD51987A84B764AF988D769E5B29365CDEFFF232",
+        "unit_root": "UNIT_F1_HEAVY_CAVALRY_V003_ROOT"
+      },
+      "source": {
+        "format": "Blender .blend",
+        "path": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/08_heavy_cavalry/heavy_cavalry_v003.blend",
+        "sha256": "B90C862F5838DF7129FEA9702534BC558B4F565071FEE6DDA2B07AC0F0100DAF"
+      },
+      "statistics": {
+        "godot_bounds_xyz_m": {
+          "dimensions": [
+            1.87024945020676,
+            4.20388793945313,
+            3.48759758472443
+          ],
+          "maximum": [
+            0.914999961853027,
+            4.20388793945313,
+            2.02799391746521
+          ],
+          "minimum": [
+            -0.955249488353729,
+            0.0,
+            -1.45960366725922
+          ]
+        },
+        "materials": 11,
+        "runtime_geometry_nodes": 117,
+        "semantic_empty_nodes": 13,
+        "source_bounds_xyz_m": {
+          "dimensions_xyz_m": [
+            1.870249,
+            3.487598,
+            4.203888
+          ],
+          "maximum_xyz_m": [
+            0.915,
+            1.459604,
+            4.203888
+          ],
+          "minimum_xyz_m": [
+            -0.955249,
+            -2.027994,
+            0.0
+          ]
+        },
+        "source_curve_objects": 18,
+        "source_mesh_objects": 99,
+        "triangles": 3358
+      },
+      "validation": {
+        "blender_clean_roundtrip": "PASS",
+        "blender_export": "PASS",
+        "godot_4_7_1_import_and_instantiate": "PASS",
+        "source_audit": "PASS"
+      },
+      "version": "v003"
+    },
+    {
+      "display_name_zh": "弓兵",
+      "godot": {
+        "materials": 14,
+        "mesh_instances": 72,
+        "node_name_mapping": {},
+        "nodes": 92,
+        "packed_scene_root_name": "chr_f1_archer_pixel_v005",
+        "surfaces": 72,
+        "unit_root_name": "UNIT_F1_ARCHER_V005_ROOT"
+      },
+      "legacy_aliases": [],
+      "order": 9,
+      "role_id": "09_archer",
+      "runtime": {
+        "bytes": 173952,
+        "format": "glTF 2.0 Binary (.glb)",
+        "import_sidecar": "map/assets/models/units/faction_01/09_archer/chr_f1_archer_pixel_v005.glb.import",
+        "path": "map/assets/models/units/faction_01/09_archer/chr_f1_archer_pixel_v005.glb",
+        "resource_path": "res://map/assets/models/units/faction_01/09_archer/chr_f1_archer_pixel_v005.glb",
+        "sha256": "577849C6F8AB2E404F26362632EB5228E52D842E22418482FDF2959F6D2730F7",
+        "unit_root": "UNIT_F1_ARCHER_V005_ROOT"
+      },
+      "source": {
+        "format": "Blender .blend",
+        "path": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/09_archer/archer_v005.blend",
+        "sha256": "586E8C9348E17CF7761F4F6B4EEE68063A86BD705ED70F37FC8EB8D39811BAE1"
+      },
+      "statistics": {
+        "godot_bounds_xyz_m": {
+          "dimensions": [
+            0.696784406900406,
+            2.09999990463257,
+            1.80250012874603
+          ],
+          "maximum": [
+            0.390784412622452,
+            2.09999990463257,
+            1.50000011920929
+          ],
+          "minimum": [
+            -0.305999994277954,
+            0.0,
+            -0.302500009536743
+          ]
+        },
+        "materials": 14,
+        "runtime_geometry_nodes": 72,
+        "semantic_empty_nodes": 20,
+        "source_bounds_xyz_m": {
+          "dimensions_xyz_m": [
+            0.687,
+            1.8025,
+            2.1
+          ],
+          "maximum_xyz_m": [
+            0.381,
+            0.3025,
+            2.1
+          ],
+          "minimum_xyz_m": [
+            -0.306,
+            -1.5,
+            0.0
+          ]
+        },
+        "source_curve_objects": 0,
+        "source_mesh_objects": 72,
+        "triangles": 1682
+      },
+      "validation": {
+        "blender_clean_roundtrip": "PASS",
+        "blender_export": "PASS",
+        "godot_4_7_1_import_and_instantiate": "PASS",
+        "source_audit": "PASS"
+      },
+      "version": "v005"
+    },
+    {
+      "display_name_zh": "弩兵",
+      "godot": {
+        "materials": 11,
+        "mesh_instances": 78,
+        "node_name_mapping": {},
+        "nodes": 90,
+        "packed_scene_root_name": "chr_f1_crossbowman_pixel_v003",
+        "surfaces": 78,
+        "unit_root_name": "UNIT_F1_CROSSBOWMAN_V003_ROOT"
+      },
+      "legacy_aliases": [],
+      "order": 10,
+      "role_id": "10_crossbowman",
+      "runtime": {
+        "bytes": 219052,
+        "format": "glTF 2.0 Binary (.glb)",
+        "import_sidecar": "map/assets/models/units/faction_01/10_crossbowman/chr_f1_crossbowman_pixel_v003.glb.import",
+        "path": "map/assets/models/units/faction_01/10_crossbowman/chr_f1_crossbowman_pixel_v003.glb",
+        "resource_path": "res://map/assets/models/units/faction_01/10_crossbowman/chr_f1_crossbowman_pixel_v003.glb",
+        "sha256": "C2F0A9DFAE4F50F77C2E56455944BD2279DDA4970EEBFDEF90B097AEE24CABA3",
+        "unit_root": "UNIT_F1_CROSSBOWMAN_V003_ROOT"
+      },
+      "source": {
+        "format": "Blender .blend",
+        "path": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/10_crossbowman/crossbowman_v003.blend",
+        "sha256": "125ECEC9FB3E904253A9A52A72A995334F636E125716D004885272D6E7B3D8FE"
+      },
+      "statistics": {
+        "godot_bounds_xyz_m": {
+          "dimensions": [
+            1.31035774946213,
+            1.82499992847443,
+            1.02940629422665
+          ],
+          "maximum": [
+            0.699785888195038,
+            1.82499992847443,
+            0.831064701080322
+          ],
+          "minimum": [
+            -0.61057186126709,
+            0.0,
+            -0.198341593146324
+          ]
+        },
+        "materials": 11,
+        "runtime_geometry_nodes": 78,
+        "semantic_empty_nodes": 12,
+        "source_bounds_xyz_m": {
+          "dimensions_xyz_m": [
+            1.307915,
+            1.023373,
+            1.825
+          ],
+          "maximum_xyz_m": [
+            0.698564,
+            0.198342,
+            1.825
+          ],
+          "minimum_xyz_m": [
+            -0.60935,
+            -0.825032,
+            0.0
+          ]
+        },
+        "source_curve_objects": 0,
+        "source_mesh_objects": 78,
+        "triangles": 2164
+      },
+      "validation": {
+        "blender_clean_roundtrip": "PASS",
+        "blender_export": "PASS",
+        "godot_4_7_1_import_and_instantiate": "PASS",
+        "source_audit": "PASS"
+      },
+      "version": "v003"
+    },
+    {
+      "display_name_zh": "侦察兵",
+      "godot": {
+        "materials": 14,
+        "mesh_instances": 59,
+        "node_name_mapping": {},
+        "nodes": 73,
+        "packed_scene_root_name": "chr_f1_scout_pixel_v003",
+        "surfaces": 59,
+        "unit_root_name": "UNIT_F1_SCOUT_V003_ROOT"
+      },
+      "legacy_aliases": [],
+      "order": 11,
+      "role_id": "11_scout",
+      "runtime": {
+        "bytes": 146948,
+        "format": "glTF 2.0 Binary (.glb)",
+        "import_sidecar": "map/assets/models/units/faction_01/11_scout/chr_f1_scout_pixel_v003.glb.import",
+        "path": "map/assets/models/units/faction_01/11_scout/chr_f1_scout_pixel_v003.glb",
+        "resource_path": "res://map/assets/models/units/faction_01/11_scout/chr_f1_scout_pixel_v003.glb",
+        "sha256": "DFA954EFFA5A6E445B9CF2B614E2D4B652F46A6EA7682FC62C47353971D9BB4E",
+        "unit_root": "UNIT_F1_SCOUT_V003_ROOT"
+      },
+      "source": {
+        "format": "Blender .blend",
+        "path": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/11_scout/scout_v003.blend",
+        "sha256": "E89B9B1680AD329387B6B2B2A58C432FBAF8B5B847B0C0F3AB8B7EAE22E7D9B2"
+      },
+      "statistics": {
+        "godot_bounds_xyz_m": {
+          "dimensions": [
+            0.946760833263397,
+            1.95010364055634,
+            0.709805816411972
+          ],
+          "maximum": [
+            0.488119184970856,
+            1.95010364055634,
+            0.330393552780151
+          ],
+          "minimum": [
+            -0.458641648292542,
+            0.0,
+            -0.379412263631821
+          ]
+        },
+        "materials": 14,
+        "runtime_geometry_nodes": 59,
+        "semantic_empty_nodes": 14,
+        "source_bounds_xyz_m": {
+          "dimensions_xyz_m": [
+            0.920395,
+            0.69934,
+            1.950104
+          ],
+          "maximum_xyz_m": [
+            0.476195,
+            0.368947,
+            1.950104
+          ],
+          "minimum_xyz_m": [
+            -0.4442,
+            -0.330394,
+            0.0
+          ]
+        },
+        "source_curve_objects": 0,
+        "source_mesh_objects": 59,
+        "triangles": 1354
+      },
+      "validation": {
+        "blender_clean_roundtrip": "PASS",
+        "blender_export": "PASS",
+        "godot_4_7_1_import_and_instantiate": "PASS",
+        "source_audit": "PASS"
+      },
+      "version": "v003"
+    },
+    {
+      "display_name_zh": "水兵",
+      "godot": {
+        "materials": 9,
+        "mesh_instances": 60,
+        "node_name_mapping": {},
+        "nodes": 71,
+        "packed_scene_root_name": "chr_f1_marine_pixel_v003",
+        "surfaces": 60,
+        "unit_root_name": "UNIT_F1_MARINE_V003_ROOT"
+      },
+      "legacy_aliases": [
+        "12_diver",
+        "diver"
+      ],
+      "order": 12,
+      "role_id": "12_marine",
+      "runtime": {
+        "bytes": 170500,
+        "format": "glTF 2.0 Binary (.glb)",
+        "import_sidecar": "map/assets/models/units/faction_01/12_marine/chr_f1_marine_pixel_v003.glb.import",
+        "path": "map/assets/models/units/faction_01/12_marine/chr_f1_marine_pixel_v003.glb",
+        "resource_path": "res://map/assets/models/units/faction_01/12_marine/chr_f1_marine_pixel_v003.glb",
+        "sha256": "D57A9E8A1732F8DF21B3ABBDB142BCAA03E31C4A0EDB94799972B88AA788705E",
+        "unit_root": "UNIT_F1_MARINE_V003_ROOT"
+      },
+      "source": {
+        "format": "Blender .blend",
+        "path": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/12_marine/marine_v003.blend",
+        "sha256": "FC7591A933B36848F2FC0B683C474E1F0ADC21B6576B5346171D08F905C40B7C"
+      },
+      "statistics": {
+        "godot_bounds_xyz_m": {
+          "dimensions": [
+            1.02604192495346,
+            1.83999991416931,
+            0.473996341228485
+          ],
+          "maximum": [
+            0.458641588687897,
+            1.83999991416931,
+            0.274269461631775
+          ],
+          "minimum": [
+            -0.567400336265564,
+            0.0,
+            -0.19972687959671
+          ]
+        },
+        "materials": 9,
+        "runtime_geometry_nodes": 60,
+        "semantic_empty_nodes": 11,
+        "source_bounds_xyz_m": {
+          "dimensions_xyz_m": [
+            1.0116,
+            0.472794,
+            1.84
+          ],
+          "maximum_xyz_m": [
+            0.4442,
+            0.199727,
+            1.84
+          ],
+          "minimum_xyz_m": [
+            -0.5674,
+            -0.273067,
+            0.0
+          ]
+        },
+        "source_curve_objects": 0,
+        "source_mesh_objects": 60,
+        "triangles": 1752
+      },
+      "validation": {
+        "blender_clean_roundtrip": "PASS",
+        "blender_export": "PASS",
+        "godot_4_7_1_import_and_instantiate": "PASS",
+        "source_audit": "PASS"
+      },
+      "version": "v003"
+    }
+  ],
+  "content_contract": {
+    "actions": 0,
+    "armatures": 0,
+    "asset_kind": "static modular units",
+    "authored_animations": 0,
+    "authored_collision": false,
+    "authored_lods": false,
+    "external_runtime_dependencies": 0,
+    "godot_import_generate_lods": false,
+    "materials": "embedded PBR parameters; no external textures"
+  },
+  "coordinate_contract": {
+    "gltf_export": "Y-up",
+    "godot_forward": "-Z",
+    "godot_root_scale": 1.0,
+    "godot_up": "+Y",
+    "source_forward": "-Y",
+    "source_units": "1 Blender Unit = 1 meter",
+    "source_up": "+Z"
+  },
+  "generated_at": "2026-08-12T14:56:08+08:00",
+  "git": {
+    "operations_performed": [],
+    "submit_expanded_package": true,
+    "submit_zip_archive": false,
+    "workspace_is_git_repository": false
+  },
+  "known_limitations": [
+    "These are static modular assets; rigging, animation, collision, and authored LODs are not included.",
+    "Godot adds a PackedScene wrapper root around the exported UNIT_F1_*_ROOT hierarchy.",
+    "Godot normalizes characters that are illegal in Node names (for example ':' and '.') to underscores; exact mappings are listed per asset.",
+    "The main project currently scans offline .blend files while its Blender importer path is unset. Validation therefore used an isolated Godot 4.7.1 project with identical res:// asset paths."
+  ],
+  "package_id": "faction_01_latest_12_godot_4_7_20260812",
+  "schema_version": 1,
+  "selection_rule": "Select the numerically highest _vNNN .blend once per logical role directory; do not select the newest twelve physical files globally.",
+  "status": "PASS",
+  "target": {
+    "engine": "Godot",
+    "engine_version": "4.7.1-stable",
+    "project_feature": "Mobile",
+    "runtime_format": "glTF 2.0 Binary (.glb)"
+  },
+  "totals": {
+    "assets": 12,
+    "glb_bytes": 2436320,
+    "per_asset_material_count_sum": 142,
+    "runtime_geometry_nodes": 903,
+    "semantic_empty_nodes": 142,
+    "source_curve_objects_baked_to_runtime_meshes": 18,
+    "source_mesh_objects": 885,
+    "triangles": 24968
+  },
+  "validation": {
+    "blender_clean_glb_roundtrip": "12/12 PASS",
+    "blender_source_audit": "PASS_WITH_DOCUMENTED_WARNINGS",
+    "godot_import_and_instantiate": "12/12 PASS",
+    "godot_validation_context": "isolated Godot 4.7.1 project with identical res:// paths",
+    "godot_version": "4.7.1-stable (official)",
+    "reports": [
+      "qa/blender_source_audit.json",
+      "qa/blender_export_report.json",
+      "qa/blender_roundtrip_report.json",
+      "qa/godot_import_report.json"
+    ],
+    "target_project_preflight": "BLOCKED_BY_UNCONFIGURED_BLENDER_IMPORTER_FOR_OFFLINE_BLEND_SOURCES"
+  }
+}

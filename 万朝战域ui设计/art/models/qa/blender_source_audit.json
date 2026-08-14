@@ -1,0 +1,248 @@
+{
+  "assets": [
+    {
+      "failures": [],
+      "generic_audit_passed": true,
+      "passed": true,
+      "role_id": "01_worker",
+      "source": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/01_worker/worker_v003.blend",
+      "source_sha256": "F639D350EE107C9215E83DEA4CA621A615E252F1DB3ABA2DCC4E2513C86FFD5D",
+      "status": "PASS",
+      "summary": {
+        "actions": 0,
+        "armatures": 0,
+        "images": 2,
+        "materials": 15,
+        "mesh_objects": 63,
+        "objects": 79,
+        "triangles": 2252
+      },
+      "warnings": []
+    },
+    {
+      "failures": [],
+      "generic_audit_passed": true,
+      "passed": true,
+      "role_id": "02_sword_shield",
+      "source": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/02_sword_shield/sword_shield_v003.blend",
+      "source_sha256": "67FD97B52E3E9BADE324182B2BA5318F4E6C5893E08BD2F5FBF4E82796143603",
+      "status": "PASS",
+      "summary": {
+        "actions": 0,
+        "armatures": 0,
+        "images": 1,
+        "materials": 12,
+        "mesh_objects": 57,
+        "objects": 71,
+        "triangles": 1692
+      },
+      "warnings": []
+    },
+    {
+      "failures": [],
+      "generic_audit_passed": true,
+      "passed": true,
+      "role_id": "03_spearman",
+      "source": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/03_spearman/spearman_v003.blend",
+      "source_sha256": "EAA7CCF7FE7FC3478795BE5C3C9C35CB36CCE15CC606481BA24602141821E747",
+      "status": "PASS",
+      "summary": {
+        "actions": 0,
+        "armatures": 0,
+        "images": 1,
+        "materials": 12,
+        "mesh_objects": 61,
+        "objects": 77,
+        "triangles": 1206
+      },
+      "warnings": []
+    },
+    {
+      "failures": [],
+      "generic_audit_passed": true,
+      "passed": true,
+      "role_id": "04_halberdier",
+      "source": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/04_halberdier/halberdier_v003.blend",
+      "source_sha256": "33F14E4D9E06B7A98B1525DB5EA125CB1633B508844C052D919C667DFC644615",
+      "status": "PASS",
+      "summary": {
+        "actions": 0,
+        "armatures": 0,
+        "images": 2,
+        "materials": 7,
+        "mesh_objects": 54,
+        "objects": 65,
+        "triangles": 2416
+      },
+      "warnings": []
+    },
+    {
+      "failures": [],
+      "generic_audit_passed": false,
+      "passed": true,
+      "role_id": "05_light_cavalry",
+      "source": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/05_light_cavalry/light_cavalry_v003.blend",
+      "source_sha256": "D4C2695DEAD4CA2291998F7E43745EEA74904A3455AFD5FD0776E853020F6410",
+      "status": "PASS_WITH_WARNINGS",
+      "summary": {
+        "actions": 0,
+        "armatures": 0,
+        "images": 0,
+        "materials": 14,
+        "mesh_objects": 87,
+        "objects": 104,
+        "triangles": 3040
+      },
+      "warnings": [
+        "LCV_Tack_BrowBand: 8 non-manifold edges",
+        "LCV_Tack_NoseBand: 8 non-manifold edges",
+        "LCV_Tack_Cheek_L: 8 non-manifold edges",
+        "LCV_Tack_Cheek_R: 8 non-manifold edges",
+        "LCV_Rider_HelmetDome: 8 non-manifold edges",
+        "LCV_Tack_Rein_L: 8 non-manifold edges",
+        "LCV_Tack_Rein_R: 8 non-manifold edges",
+        "LCV_Tack_StirrupStrap_L: 8 non-manifold edges",
+        "LCV_Tack_StirrupStrap_R: 8 non-manifold edges"
+      ]
+    },
+    {
+      "failures": [],
+      "generic_audit_passed": true,
+      "passed": true,
+      "role_id": "06_heavy_infantry",
+      "source": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/06_heavy_infantry/heavy_infantry_v003.blend",
+      "source_sha256": "D66EEFDF6ABCD9D48B633323A1D05D5EF5E6BAB4367207F13D91597DC503F8ED",
+      "status": "PASS",
+      "summary": {
+        "actions": 0,
+        "armatures": 0,
+        "images": 2,
+        "materials": 11,
+        "mesh_objects": 81,
+        "objects": 91,
+        "triangles": 1696
+      },
+      "warnings": []
+    },
+    {
+      "failures": [],
+      "generic_audit_passed": true,
+      "passed": true,
+      "role_id": "07_horse_archer",
+      "source": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/07_horse_archer/horse_archer_v003.blend",
+      "source_sha256": "5C1DFE9D49D2BE95F296FA21B6BEA7B8FDEEFB7724CDA8460EC1648DB6EB2654",
+      "status": "PASS",
+      "summary": {
+        "actions": 0,
+        "armatures": 0,
+        "images": 2,
+        "materials": 12,
+        "mesh_objects": 114,
+        "objects": 137,
+        "triangles": 2356
+      },
+      "warnings": []
+    },
+    {
+      "failures": [],
+      "generic_audit_passed": true,
+      "passed": true,
+      "role_id": "08_heavy_cavalry",
+      "source": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/08_heavy_cavalry/heavy_cavalry_v003.blend",
+      "source_sha256": "B90C862F5838DF7129FEA9702534BC558B4F565071FEE6DDA2B07AC0F0100DAF",
+      "status": "PASS",
+      "summary": {
+        "actions": 0,
+        "armatures": 0,
+        "images": 2,
+        "materials": 12,
+        "mesh_objects": 99,
+        "objects": 134,
+        "triangles": 2858
+      },
+      "warnings": []
+    },
+    {
+      "failures": [],
+      "generic_audit_passed": true,
+      "passed": true,
+      "role_id": "09_archer",
+      "source": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/09_archer/archer_v005.blend",
+      "source_sha256": "586E8C9348E17CF7761F4F6B4EEE68063A86BD705ED70F37FC8EB8D39811BAE1",
+      "status": "PASS",
+      "summary": {
+        "actions": 0,
+        "armatures": 0,
+        "images": 0,
+        "materials": 14,
+        "mesh_objects": 72,
+        "objects": 92,
+        "triangles": 1682
+      },
+      "warnings": []
+    },
+    {
+      "failures": [],
+      "generic_audit_passed": true,
+      "passed": true,
+      "role_id": "10_crossbowman",
+      "source": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/10_crossbowman/crossbowman_v003.blend",
+      "source_sha256": "125ECEC9FB3E904253A9A52A72A995334F636E125716D004885272D6E7B3D8FE",
+      "status": "PASS",
+      "summary": {
+        "actions": 0,
+        "armatures": 0,
+        "images": 1,
+        "materials": 11,
+        "mesh_objects": 78,
+        "objects": 90,
+        "triangles": 2164
+      },
+      "warnings": []
+    },
+    {
+      "failures": [],
+      "generic_audit_passed": true,
+      "passed": true,
+      "role_id": "11_scout",
+      "source": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/11_scout/scout_v003.blend",
+      "source_sha256": "E89B9B1680AD329387B6B2B2A58C432FBAF8B5B847B0C0F3AB8B7EAE22E7D9B2",
+      "status": "PASS",
+      "summary": {
+        "actions": 0,
+        "armatures": 0,
+        "images": 2,
+        "materials": 15,
+        "mesh_objects": 59,
+        "objects": 73,
+        "triangles": 1354
+      },
+      "warnings": []
+    },
+    {
+      "failures": [],
+      "generic_audit_passed": true,
+      "passed": true,
+      "role_id": "12_marine",
+      "source": "art/blender/faction1_pixel_roster_upgrade_20260810/roles/12_marine/marine_v003.blend",
+      "source_sha256": "FC7591A933B36848F2FC0B683C474E1F0ADC21B6576B5346171D08F905C40B7C",
+      "status": "PASS",
+      "summary": {
+        "actions": 0,
+        "armatures": 0,
+        "images": 0,
+        "materials": 9,
+        "mesh_objects": 60,
+        "objects": 71,
+        "triangles": 1752
+      },
+      "warnings": []
+    }
+  ],
+  "blender_version": "5.2.0 LTS",
+  "known_warnings": {
+    "05_light_cavalry": "Nine intentionally open strip/dome meshes are reported as non-manifold by the generic audit. The frozen V003 structure report records zero hard failures and an official PASS; packaging does not alter source topology."
+  },
+  "schema_version": 1,
+  "status": "PASS_WITH_DOCUMENTED_WARNINGS"
+}

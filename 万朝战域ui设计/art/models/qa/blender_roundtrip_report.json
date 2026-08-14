@@ -1,0 +1,657 @@
+{
+  "asset_count": 12,
+  "assets": [
+    {
+      "failures": [],
+      "glb_sha256": "67A12BD98936173CB10659AC885AE27857A8EBE96F2B0EDD29B9A4C4D02DB534",
+      "gltf": {
+        "animations": 0,
+        "cameras": 0,
+        "extensions_used": [],
+        "extras_paths": [],
+        "images": 0,
+        "local_absolute_path_strings": [],
+        "materials": 15,
+        "meshes": 63,
+        "nodes": 73,
+        "scene_names": [
+          "chr_f1_worker_pixel_v003"
+        ],
+        "skins": 0,
+        "textures": 0
+      },
+      "role_id": "01_worker",
+      "roundtrip": {
+        "empty_objects": 10,
+        "geometry": {
+          "dimensions_xyz_m": [
+            0.999835,
+            0.5145,
+            1.778525
+          ],
+          "maximum_xyz_m": [
+            0.521335,
+            0.243339,
+            1.778525
+          ],
+          "minimum_xyz_m": [
+            -0.4785,
+            -0.27116,
+            0.0
+          ],
+          "triangles": 2252
+        },
+        "materials": 15,
+        "mesh_objects": 63,
+        "objects": 73,
+        "root_determinant_positive": true,
+        "root_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "unit_root": "UNIT_F1_WORKER_V003_ROOT"
+      },
+      "runtime": "map/assets/models/units/faction_01/01_worker/chr_f1_worker_pixel_v003.glb",
+      "status": "PASS"
+    },
+    {
+      "failures": [],
+      "glb_sha256": "458CF4248AF07B05C1880D7023BF50FD59D5C533E93637535652833381C39B5D",
+      "gltf": {
+        "animations": 0,
+        "cameras": 0,
+        "extensions_used": [],
+        "extras_paths": [],
+        "images": 0,
+        "local_absolute_path_strings": [],
+        "materials": 12,
+        "meshes": 57,
+        "nodes": 65,
+        "scene_names": [
+          "chr_f1_sword_shield_pixel_v003"
+        ],
+        "skins": 0,
+        "textures": 0
+      },
+      "role_id": "02_sword_shield",
+      "roundtrip": {
+        "empty_objects": 8,
+        "geometry": {
+          "dimensions_xyz_m": [
+            1.4248,
+            0.5625,
+            1.825
+          ],
+          "maximum_xyz_m": [
+            0.5724,
+            0.17,
+            1.825
+          ],
+          "minimum_xyz_m": [
+            -0.8524,
+            -0.3925,
+            0.0
+          ],
+          "triangles": 1692
+        },
+        "materials": 12,
+        "mesh_objects": 57,
+        "objects": 65,
+        "root_determinant_positive": true,
+        "root_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "unit_root": "UNIT_F1_SWORD_SHIELD_V003_ROOT"
+      },
+      "runtime": "map/assets/models/units/faction_01/02_sword_shield/chr_f1_sword_shield_pixel_v003.glb",
+      "status": "PASS"
+    },
+    {
+      "failures": [],
+      "glb_sha256": "F969E8EC04F7BB2171070A34F6027F349B49408472254ABA3BAAFA649098D0F1",
+      "gltf": {
+        "animations": 0,
+        "cameras": 0,
+        "extensions_used": [],
+        "extras_paths": [],
+        "images": 0,
+        "local_absolute_path_strings": [],
+        "materials": 12,
+        "meshes": 61,
+        "nodes": 71,
+        "scene_names": [
+          "chr_f1_spearman_pixel_v003"
+        ],
+        "skins": 0,
+        "textures": 0
+      },
+      "role_id": "03_spearman",
+      "roundtrip": {
+        "empty_objects": 10,
+        "geometry": {
+          "dimensions_xyz_m": [
+            1.015643,
+            0.721243,
+            2.473042
+          ],
+          "maximum_xyz_m": [
+            0.65773,
+            0.224361,
+            2.473042
+          ],
+          "minimum_xyz_m": [
+            -0.357913,
+            -0.496882,
+            0.0
+          ],
+          "triangles": 1206
+        },
+        "materials": 12,
+        "mesh_objects": 61,
+        "objects": 71,
+        "root_determinant_positive": true,
+        "root_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "unit_root": "UNIT_F1_SPEARMAN_V003_ROOT"
+      },
+      "runtime": "map/assets/models/units/faction_01/03_spearman/chr_f1_spearman_pixel_v003.glb",
+      "status": "PASS"
+    },
+    {
+      "failures": [],
+      "glb_sha256": "1377E96936FD1D149AA5A82FB2857E568B3BBE37E89226F826BA45C453EEAAE9",
+      "gltf": {
+        "animations": 0,
+        "cameras": 0,
+        "extensions_used": [],
+        "extras_paths": [],
+        "images": 0,
+        "local_absolute_path_strings": [],
+        "materials": 7,
+        "meshes": 54,
+        "nodes": 61,
+        "scene_names": [
+          "chr_f1_halberdier_pixel_v003"
+        ],
+        "skins": 0,
+        "textures": 0
+      },
+      "role_id": "04_halberdier",
+      "roundtrip": {
+        "empty_objects": 7,
+        "geometry": {
+          "dimensions_xyz_m": [
+            1.697843,
+            0.591935,
+            2.300179
+          ],
+          "maximum_xyz_m": [
+            0.989836,
+            0.230658,
+            2.300179
+          ],
+          "minimum_xyz_m": [
+            -0.708007,
+            -0.361277,
+            0.0
+          ],
+          "triangles": 2416
+        },
+        "materials": 7,
+        "mesh_objects": 54,
+        "objects": 61,
+        "root_determinant_positive": true,
+        "root_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "unit_root": "UNIT_F1_HALBERDIER_V003_ROOT"
+      },
+      "runtime": "map/assets/models/units/faction_01/04_halberdier/chr_f1_halberdier_pixel_v003.glb",
+      "status": "PASS"
+    },
+    {
+      "failures": [],
+      "glb_sha256": "18CC6BAB2189E93A321CCCE52D42A6DBB5D655D9F8F4DFA539F4D98DEAE61664",
+      "gltf": {
+        "animations": 0,
+        "cameras": 0,
+        "extensions_used": [],
+        "extras_paths": [],
+        "images": 0,
+        "local_absolute_path_strings": [],
+        "materials": 14,
+        "meshes": 87,
+        "nodes": 100,
+        "scene_names": [
+          "chr_f1_light_cavalry_pixel_v003"
+        ],
+        "skins": 0,
+        "textures": 0
+      },
+      "role_id": "05_light_cavalry",
+      "roundtrip": {
+        "empty_objects": 13,
+        "geometry": {
+          "dimensions_xyz_m": [
+            1.693663,
+            2.841565,
+            4.047917
+          ],
+          "maximum_xyz_m": [
+            0.608912,
+            1.21357,
+            4.047917
+          ],
+          "minimum_xyz_m": [
+            -1.084752,
+            -1.627994,
+            0.0
+          ],
+          "triangles": 3040
+        },
+        "materials": 14,
+        "mesh_objects": 87,
+        "objects": 100,
+        "root_determinant_positive": true,
+        "root_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "unit_root": "UNIT_F1_LIGHT_CAVALRY_V003_ROOT"
+      },
+      "runtime": "map/assets/models/units/faction_01/05_light_cavalry/chr_f1_light_cavalry_pixel_v003.glb",
+      "status": "PASS"
+    },
+    {
+      "failures": [],
+      "glb_sha256": "3E38623AB7D74ABA49A31F372439891EE1413A2DB7798347438171117881BBFE",
+      "gltf": {
+        "animations": 0,
+        "cameras": 0,
+        "extensions_used": [],
+        "extras_paths": [],
+        "images": 0,
+        "local_absolute_path_strings": [],
+        "materials": 11,
+        "meshes": 81,
+        "nodes": 87,
+        "scene_names": [
+          "chr_f1_heavy_infantry_pixel_v003"
+        ],
+        "skins": 0,
+        "textures": 0
+      },
+      "role_id": "06_heavy_infantry",
+      "roundtrip": {
+        "empty_objects": 6,
+        "geometry": {
+          "dimensions_xyz_m": [
+            1.211351,
+            0.4,
+            1.825
+          ],
+          "maximum_xyz_m": [
+            0.645551,
+            0.18,
+            1.825
+          ],
+          "minimum_xyz_m": [
+            -0.5658,
+            -0.22,
+            0.0
+          ],
+          "triangles": 1696
+        },
+        "materials": 11,
+        "mesh_objects": 81,
+        "objects": 87,
+        "root_determinant_positive": true,
+        "root_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "unit_root": "UNIT_F1_HEAVY_INFANTRY_V003_ROOT"
+      },
+      "runtime": "map/assets/models/units/faction_01/06_heavy_infantry/chr_f1_heavy_infantry_pixel_v003.glb",
+      "status": "PASS"
+    },
+    {
+      "failures": [],
+      "glb_sha256": "15BE68245F6C28C1211C6A75D19BAAF2B080CF395C3095FBEF6A72CE8C3A01C9",
+      "gltf": {
+        "animations": 0,
+        "cameras": 0,
+        "extensions_used": [],
+        "extras_paths": [],
+        "images": 0,
+        "local_absolute_path_strings": [],
+        "materials": 12,
+        "meshes": 114,
+        "nodes": 132,
+        "scene_names": [
+          "chr_f1_horse_archer_pixel_v003"
+        ],
+        "skins": 0,
+        "textures": 0
+      },
+      "role_id": "07_horse_archer",
+      "roundtrip": {
+        "empty_objects": 18,
+        "geometry": {
+          "dimensions_xyz_m": [
+            1.381472,
+            2.698452,
+            3.053077
+          ],
+          "maximum_xyz_m": [
+            0.603682,
+            1.083452,
+            3.053077
+          ],
+          "minimum_xyz_m": [
+            -0.77779,
+            -1.615,
+            0.0
+          ],
+          "triangles": 2356
+        },
+        "materials": 12,
+        "mesh_objects": 114,
+        "objects": 132,
+        "root_determinant_positive": true,
+        "root_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "unit_root": "UNIT_F1_HORSE_ARCHER_V003_ROOT"
+      },
+      "runtime": "map/assets/models/units/faction_01/07_horse_archer/chr_f1_horse_archer_pixel_v003.glb",
+      "status": "PASS"
+    },
+    {
+      "failures": [],
+      "glb_sha256": "1EA02C53CA81EAA9D3238307FD51987A84B764AF988D769E5B29365CDEFFF232",
+      "gltf": {
+        "animations": 0,
+        "cameras": 0,
+        "extensions_used": [],
+        "extras_paths": [],
+        "images": 0,
+        "local_absolute_path_strings": [],
+        "materials": 11,
+        "meshes": 117,
+        "nodes": 130,
+        "scene_names": [
+          "chr_f1_heavy_cavalry_pixel_v003"
+        ],
+        "skins": 0,
+        "textures": 0
+      },
+      "role_id": "08_heavy_cavalry",
+      "roundtrip": {
+        "empty_objects": 13,
+        "geometry": {
+          "dimensions_xyz_m": [
+            1.870249,
+            3.487598,
+            4.203888
+          ],
+          "maximum_xyz_m": [
+            0.915,
+            1.459604,
+            4.203888
+          ],
+          "minimum_xyz_m": [
+            -0.955249,
+            -2.027994,
+            0.0
+          ],
+          "triangles": 3358
+        },
+        "materials": 11,
+        "mesh_objects": 117,
+        "objects": 130,
+        "root_determinant_positive": true,
+        "root_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "unit_root": "UNIT_F1_HEAVY_CAVALRY_V003_ROOT"
+      },
+      "runtime": "map/assets/models/units/faction_01/08_heavy_cavalry/chr_f1_heavy_cavalry_pixel_v003.glb",
+      "status": "PASS"
+    },
+    {
+      "failures": [],
+      "glb_sha256": "577849C6F8AB2E404F26362632EB5228E52D842E22418482FDF2959F6D2730F7",
+      "gltf": {
+        "animations": 0,
+        "cameras": 0,
+        "extensions_used": [],
+        "extras_paths": [],
+        "images": 0,
+        "local_absolute_path_strings": [],
+        "materials": 14,
+        "meshes": 72,
+        "nodes": 92,
+        "scene_names": [
+          "chr_f1_archer_pixel_v005"
+        ],
+        "skins": 0,
+        "textures": 0
+      },
+      "role_id": "09_archer",
+      "roundtrip": {
+        "empty_objects": 20,
+        "geometry": {
+          "dimensions_xyz_m": [
+            0.687,
+            1.8025,
+            2.1
+          ],
+          "maximum_xyz_m": [
+            0.381,
+            0.3025,
+            2.1
+          ],
+          "minimum_xyz_m": [
+            -0.306,
+            -1.5,
+            0.0
+          ],
+          "triangles": 1682
+        },
+        "materials": 14,
+        "mesh_objects": 72,
+        "objects": 92,
+        "root_determinant_positive": true,
+        "root_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "unit_root": "UNIT_F1_ARCHER_V005_ROOT"
+      },
+      "runtime": "map/assets/models/units/faction_01/09_archer/chr_f1_archer_pixel_v005.glb",
+      "status": "PASS"
+    },
+    {
+      "failures": [],
+      "glb_sha256": "C2F0A9DFAE4F50F77C2E56455944BD2279DDA4970EEBFDEF90B097AEE24CABA3",
+      "gltf": {
+        "animations": 0,
+        "cameras": 0,
+        "extensions_used": [],
+        "extras_paths": [],
+        "images": 0,
+        "local_absolute_path_strings": [],
+        "materials": 11,
+        "meshes": 78,
+        "nodes": 90,
+        "scene_names": [
+          "chr_f1_crossbowman_pixel_v003"
+        ],
+        "skins": 0,
+        "textures": 0
+      },
+      "role_id": "10_crossbowman",
+      "roundtrip": {
+        "empty_objects": 12,
+        "geometry": {
+          "dimensions_xyz_m": [
+            1.307915,
+            1.023373,
+            1.825
+          ],
+          "maximum_xyz_m": [
+            0.698564,
+            0.198342,
+            1.825
+          ],
+          "minimum_xyz_m": [
+            -0.60935,
+            -0.825032,
+            0.0
+          ],
+          "triangles": 2164
+        },
+        "materials": 11,
+        "mesh_objects": 78,
+        "objects": 90,
+        "root_determinant_positive": true,
+        "root_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "unit_root": "UNIT_F1_CROSSBOWMAN_V003_ROOT"
+      },
+      "runtime": "map/assets/models/units/faction_01/10_crossbowman/chr_f1_crossbowman_pixel_v003.glb",
+      "status": "PASS"
+    },
+    {
+      "failures": [],
+      "glb_sha256": "DFA954EFFA5A6E445B9CF2B614E2D4B652F46A6EA7682FC62C47353971D9BB4E",
+      "gltf": {
+        "animations": 0,
+        "cameras": 0,
+        "extensions_used": [],
+        "extras_paths": [],
+        "images": 0,
+        "local_absolute_path_strings": [],
+        "materials": 14,
+        "meshes": 59,
+        "nodes": 73,
+        "scene_names": [
+          "chr_f1_scout_pixel_v003"
+        ],
+        "skins": 0,
+        "textures": 0
+      },
+      "role_id": "11_scout",
+      "roundtrip": {
+        "empty_objects": 14,
+        "geometry": {
+          "dimensions_xyz_m": [
+            0.920395,
+            0.69934,
+            1.950104
+          ],
+          "maximum_xyz_m": [
+            0.476195,
+            0.368947,
+            1.950104
+          ],
+          "minimum_xyz_m": [
+            -0.4442,
+            -0.330394,
+            0.0
+          ],
+          "triangles": 1354
+        },
+        "materials": 14,
+        "mesh_objects": 59,
+        "objects": 73,
+        "root_determinant_positive": true,
+        "root_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "unit_root": "UNIT_F1_SCOUT_V003_ROOT"
+      },
+      "runtime": "map/assets/models/units/faction_01/11_scout/chr_f1_scout_pixel_v003.glb",
+      "status": "PASS"
+    },
+    {
+      "failures": [],
+      "glb_sha256": "D57A9E8A1732F8DF21B3ABBDB142BCAA03E31C4A0EDB94799972B88AA788705E",
+      "gltf": {
+        "animations": 0,
+        "cameras": 0,
+        "extensions_used": [],
+        "extras_paths": [],
+        "images": 0,
+        "local_absolute_path_strings": [],
+        "materials": 9,
+        "meshes": 60,
+        "nodes": 71,
+        "scene_names": [
+          "chr_f1_marine_pixel_v003"
+        ],
+        "skins": 0,
+        "textures": 0
+      },
+      "role_id": "12_marine",
+      "roundtrip": {
+        "empty_objects": 11,
+        "geometry": {
+          "dimensions_xyz_m": [
+            1.0116,
+            0.472794,
+            1.84
+          ],
+          "maximum_xyz_m": [
+            0.4442,
+            0.199727,
+            1.84
+          ],
+          "minimum_xyz_m": [
+            -0.5674,
+            -0.273067,
+            0.0
+          ],
+          "triangles": 1752
+        },
+        "materials": 9,
+        "mesh_objects": 60,
+        "objects": 71,
+        "root_determinant_positive": true,
+        "root_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "unit_root": "UNIT_F1_MARINE_V003_ROOT"
+      },
+      "runtime": "map/assets/models/units/faction_01/12_marine/chr_f1_marine_pixel_v003.glb",
+      "status": "PASS"
+    }
+  ],
+  "blender_version": "5.2.0 LTS",
+  "failures": [],
+  "schema_version": 1,
+  "status": "PASS"
+}

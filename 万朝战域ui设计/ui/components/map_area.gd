@@ -221,6 +221,13 @@ func request_delete_building(building_id: String) -> Dictionary:
 	return _map_world.request_delete_building(building_id)
 
 
+## 路线预览转发入口（供 DemoInteractionService 注入调用，target_grid 为目标格子坐标）
+func request_route_preview(target_grid: Vector2i) -> Dictionary:
+	if _map_world == null:
+		return {"success": false, "reason": "地图尚未就绪", "message": "地图尚未就绪"}
+	return _map_world.request_route_preview(target_grid)
+
+
 func _on_build_mode_changed(active: bool) -> void:
 	build_mode_changed.emit(active)
 
