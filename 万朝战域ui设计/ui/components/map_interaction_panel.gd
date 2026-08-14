@@ -207,14 +207,15 @@ func _build_detail_text() -> String:
 			parts.append("状态：%s" % ("中立" if neutral else "已占领"))
 
 		_:
-			# 普通格子 / 道路 / 桥梁 / 关隘 等：地形 + 区域 + 高度 + 道路 + 坐标
+			# 普通格子 / 道路 / 桥梁 / 关隘 等：地形 + 区域 + 高度等级 + 道路 + 坐标
 			var terrain: String = str(snapshot.get("terrain", "未知"))
 			if terrain != "未知":
 				parts.append("地形：%s" % terrain)
 			if _context.zone_name != "":
 				parts.append("区域：%s" % _context.zone_name)
-			var height_val: float = float(snapshot.get("height", 0.0))
-			parts.append("高度：%.1f" % height_val)
+			# 显示逻辑高度等级（阶梯等级），而非世界 Y 坐标
+			var height_level: int = int(snapshot.get("height_level", 0))
+			parts.append("高度等级：%d" % height_level)
 			var road_name: String = str(snapshot.get("road_name", ""))
 			if road_name != "" and road_name != "无":
 				parts.append("道路：%s" % road_name)

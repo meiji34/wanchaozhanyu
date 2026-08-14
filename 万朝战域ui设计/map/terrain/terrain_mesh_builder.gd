@@ -192,15 +192,21 @@ static func build_road_mesh(
 				and data.get_road_type_at(grid_position) != road_type_filter
 			):
 				continue
-			var is_bridge := (
+			var is_river_road := (
 				data.get_terrain_type_at(grid_position) == MapTileTypes.Terrain.RIVER
 			)
-			if is_bridge != bridges:
+			var registered_crossing_type := data.get_crossing_type_at(grid_position)
+			var is_registered_crossing := not registered_crossing_type.is_empty()
+			# 注册过河点的岸侧延伸也绘制桥面；未注册的水上低级道路继续保持中断。
+			if bridges:
+				if not is_registered_crossing:
+					continue
+			elif is_river_road or is_registered_crossing:
 				continue
 			if (
 				bridges
 				and not crossing_type_filter.is_empty()
-				and data.get_crossing_type_at(grid_position) != crossing_type_filter
+				and registered_crossing_type != crossing_type_filter
 			):
 				continue
 			var base_index := vertices.size()

@@ -526,3 +526,193 @@ func test_building_does_not_pollute_fog_data() -> void:
 		"山地阵营建造不得影响森林阵营探索数据"
 	)
 	data.fog_data = null
+
+
+## ——— 建筑方向选择（第一版）———
+
+
+func test_building_catalog_contains_both_test_buildings() -> void:
+	var catalog := MapBuildingDefinition.get_building_catalog()
+	assert_eq(catalog.size(), 2, "建筑目录必须包含 2 种测试建筑")
+	assert_eq(catalog[0].footprint_size, Vector2i(3, 3), "建筑 A 基础占地 3×3")
+	assert_eq(catalog[1].footprint_size, Vector2i(3, 4), "建筑 B 基础占地 3×4")
+	assert_eq(catalog[1].height_levels, 3, "建筑 B 高度 3 级")
+	assert_ne(catalog[0].building_id, catalog[1].building_id, "两种建筑 ID 必须不同")
+
+
+func test_rotated_footprint_size() -> void:
+	# 3×4：90°/270° 交换 X、Z，0°/180° 保持基础尺寸
+	assert_eq(MapBuildingDefinition.get_rotated_footprint_size(Vector2i(3, 4), 0), Vector2i(3, 4))
+	assert_eq(MapBuildingDefinition.get_rotated_footprint_size(Vector2i(3, 4), 1), Vector2i(4, 3))
+	assert_eq(MapBuildingDefinition.get_rotated_footprint_size(Vector2i(3, 4), 2), Vector2i(3, 4))
+	assert_eq(MapBuildingDefinition.get_rotated_footprint_size(Vector2i(3, 4), 3), Vector2i(4, 3))
+	# 3×3：四个方向占地不变
+	for i in range(4):
+		assert_eq(
+			MapBuildingDefinition.get_rotated_footprint_size(Vector2i(3, 3), i),
+			Vector2i(3, 3),
+			"3×3 旋转后占地必须仍为 3×3"
+		)
+	# 索引规范化：负数与越界索引安全循环
+	assert_eq(MapBuildingDefinition.normalize_rotation_index(4), 0)
+	assert_eq(MapBuildingDefinition.normalize_rotation_index(-1), 3)
+	# index → 角度统一换算（禁止散落魔法数字）
+	assert_true(is_equal_approx(MapBuildingDefinition.rotation_index_to_y_rotation(1), PI * 0.5))
+	assert_true(is_equal_approx(MapBuildingDefinition.rotation_index_to_y_rotation(3), PI * 1.5))
+	assert_eq(MapBuildingDefinition.get_rotation_display_name(0), "北")
+	assert_eq(MapBuildingDefinition.get_rotation_display_name(3), "西")
+
+
+func test_rotated_footprint_cells_and_anchor() -> void:
+	var definition := MapBuildingDefinition.create_test_building_b()
+	var origin := Vector2i(10, 10)
+	var cells_0 := definition.get_footprint_cells(origin, 0)
+	var cells_1 := definition.get_footprint_cells(origin, 1)
+	var cells_2 := definition.get_footprint_cells(origin, 2)
+	var cells_3 := definition.get_footprint_cells(origin, 3)
+	# 四个方向占地均为 12 格，且锚点格始终包含在占地内
+	for cells in [cells_0, cells_1, cells_2, cells_3]:
+		assert_eq(cells.size(), 12, "3×4 建筑任意方向必须占 12 格")
+		assert_true(cells.has(origin), "锚点格必须始终包含在占地内")
+	# 0° 与 180° 占地一致，90° 与 270° 占地一致，两组之间不同
+	assert_eq(cells_0, cells_2)
+	assert_eq(cells_1, cells_3)
+	assert_ne(cells_0, cells_1, "3×4 旋转 90° 后占地格子必须变化")
+	# 占地中心与旋转后尺寸一致（统一锚点函数，无手动半格偏移）
+	assert_eq(
+		definition.get_footprint_center(origin, 1),
+		MapBuildingDefinition.compute_footprint_center(origin, Vector2i(4, 3))
+	)
+	assert_eq(
+		definition.get_footprint_center(origin, 0),
+		MapBuildingDefinition.compute_footprint_center(origin, Vector2i(3, 4))
+	)
+
+
+func _find_flat_buildable_origin_for(
+	manager: MapBuildingManager,
+	definition: MapBuildingDefinition,
+	rotation_index: int
+) -> Vector2i:
+	for y in range(-60, 60):
+		for x in range(-60, 60):
+			var origin := Vector2i(x, y)
+			var result := manager.validate_placement(
+				definition, origin, DemoPlayerContext.FactionId.FOREST, rotation_index
+			)
+			if bool(result.get("valid", false)):
+				return origin
+	return INVALID_ORIGIN
+
+
+func test_place_rotated_building_saves_direction() -> void:
+	var manager := _make_manager()
+	var definition := MapBuildingDefinition.create_test_building_b()
+	var data := _get_map_data()
+	var origin := _find_flat_buildable_origin_for(manager, definition, 1)
+	assert_ne(origin, INVALID_ORIGIN, "应能找到合法的 4×3 平整建造区域")
+	var result := manager.place_building(definition, origin, DemoPlayerContext.FactionId.FOREST, 1)
+	assert_true(bool(result.get("success", false)), "90° 合法位置必须建造成功")
+	var building := manager.get_building_by_id(str(result.get("building_id", "")))
+	assert_true(building != null)
+	# 业务数据：基础尺寸不改写，方向保存为离散索引
+	assert_eq(building.rotation_index, 1, "建筑必须保存 rotation_index")
+	assert_eq(building.footprint_size, Vector2i(3, 4), "BuildingData 保存基础占地尺寸")
+	assert_eq(building.get_rotated_footprint_size(), Vector2i(4, 3), "旋转后占地为 4×3")
+	assert_eq(building.occupied_cells.size(), 12, "旋转后必须占用 12 格")
+	assert_eq(building.owner_faction_id, DemoPlayerContext.FactionId.FOREST, "旋转不影响阵营归属")
+	var snapshot: Dictionary = result.get("snapshot", {})
+	assert_eq(int(snapshot.get("rotation_index", -1)), 1, "快照必须携带方向")
+	assert_eq(snapshot.get("footprint_size", Vector2i.ZERO), Vector2i(4, 3), "快照占地为旋转后尺寸")
+	# 视觉节点：网格按基础尺寸构建，节点按方向旋转，中心对齐旋转后占地中心
+	var node := manager._building_nodes.get(building.building_id) as MeshInstance3D
+	assert_true(node != null)
+	if node != null:
+		var mesh := node.mesh as BoxMesh
+		assert_eq(mesh.size, definition.get_world_size(data.cell_size), "网格保持基础 3×4 尺寸")
+		assert_true(is_equal_approx(node.rotation.y, PI * 0.5), "节点必须按 rotation_index 旋转")
+		var expected_center := MapBuildingDefinition.compute_footprint_center(origin, Vector2i(4, 3))
+		var expected_world := data.grid_to_world_continuous(
+			expected_center, building.foundation_height + mesh.size.y * 0.5
+		)
+		assert_true(is_equal_approx(node.position.x, expected_world.x), "建筑中心 X 对齐 4×3 占地中心")
+		assert_true(is_equal_approx(node.position.z, expected_world.z), "建筑中心 Z 对齐 4×3 占地中心")
+
+
+func test_delete_rotated_building_releases_all_cells() -> void:
+	var manager := _make_manager()
+	var definition := MapBuildingDefinition.create_test_building_b()
+	var origin := _find_flat_buildable_origin_for(manager, definition, 1)
+	assert_ne(origin, INVALID_ORIGIN)
+	var placed := manager.place_building(definition, origin, DemoPlayerContext.FactionId.FOREST, 1)
+	assert_true(bool(placed.get("success", false)))
+	var building_id := str(placed.get("building_id", ""))
+	var occupied: Array = manager.get_building_by_id(building_id).occupied_cells.duplicate()
+	assert_eq(occupied.size(), 12)
+	var deleted := manager.request_delete_building(building_id, DemoPlayerContext.FactionId.FOREST)
+	assert_true(bool(deleted.get("success", false)))
+	# 删除以保存的 occupied_cells 为准（不重新推导），12 格全部精确释放
+	for cell in occupied:
+		assert_false(manager.is_cell_occupied_by_building(cell), "旋转建筑删除必须释放格子：%s" % cell)
+	var revalidated := manager.validate_placement(
+		definition, origin, DemoPlayerContext.FactionId.FOREST, 1
+	)
+	assert_true(bool(revalidated.get("valid", false)), "删除后原位置原方向必须可重新建造")
+
+
+func test_rotation_changes_validation_result() -> void:
+	var manager := _make_manager()
+	var definition_a := MapBuildingDefinition.create_test_building()
+	var definition_b := MapBuildingDefinition.create_test_building_b()
+	# 构造场景：A 位于 B 西侧 3 格。B 取 3×4（0°）时不重叠，旋转 90°（4×3）后与 A 重叠。
+	var origin_b := INVALID_ORIGIN
+	var origin_a := INVALID_ORIGIN
+	for y in range(-60, 60):
+		for x in range(-60, 60):
+			var candidate := Vector2i(x, y)
+			var neighbor := candidate + Vector2i(-3, 0)
+			var rb0 := manager.validate_placement(
+				definition_b, candidate, DemoPlayerContext.FactionId.FOREST, 0
+			)
+			var ra := manager.validate_placement(
+				definition_a, neighbor, DemoPlayerContext.FactionId.FOREST
+			)
+			if bool(rb0.get("valid", false)) and bool(ra.get("valid", false)):
+				origin_b = candidate
+				origin_a = neighbor
+				break
+		if origin_b != INVALID_ORIGIN:
+			break
+	assert_ne(origin_b, INVALID_ORIGIN, "应能找到 B 0° 与 A 同时合法的位置")
+	assert_true(
+		bool(manager.place_building(definition_a, origin_a, DemoPlayerContext.FactionId.FOREST)
+			.get("success", false))
+	)
+	var still_valid := manager.validate_placement(
+		definition_b, origin_b, DemoPlayerContext.FactionId.FOREST, 0
+	)
+	assert_true(bool(still_valid.get("valid", false)), "0° 方向与既有建筑不重叠")
+	var rotated := manager.validate_placement(
+		definition_b, origin_b, DemoPlayerContext.FactionId.FOREST, 1
+	)
+	assert_false(bool(rotated.get("valid", true)), "旋转 90° 后与既有建筑重叠必须非法")
+	assert_eq(str(rotated.get("reason", "")), "占地区域已被其他建筑占用")
+
+
+func test_rotation_out_of_bounds_at_map_edge() -> void:
+	var manager := _make_manager()
+	var definition := MapBuildingDefinition.create_test_building_b()
+	var data := _get_map_data()
+	# 贴近地图角落：3×4（0°）占地在界内，旋转 90°（4×3）后西侧越界
+	var origin := data.get_min_grid() + Vector2i(1, 2)
+	var result_0 := manager.validate_placement(
+		definition, origin, DemoPlayerContext.FactionId.FOREST, 0
+	)
+	assert_ne(
+		str(result_0.get("reason", "")), "占地区域超出地图边界", "0° 方向占地不得越界"
+	)
+	var result_1 := manager.validate_placement(
+		definition, origin, DemoPlayerContext.FactionId.FOREST, 1
+	)
+	assert_false(bool(result_1.get("valid", true)), "边缘旋转后越界必须非法")
+	assert_eq(str(result_1.get("reason", "")), "占地区域超出地图边界")

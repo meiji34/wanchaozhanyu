@@ -9,6 +9,10 @@ enum MapInitState {
 	FAILED,        ## 初始化失败
 }
 
+const SELECTION_HIGHLIGHT_Y_OFFSET := 0.08
+const SELECTION_HIGHLIGHT_CELL_SCALE := 0.91
+const SELECTION_HIGHLIGHT_THICKNESS := 0.04
+
 signal map_ready
 signal tile_selected(tile_id: Vector2i)
 signal city_selected(city_id: String, tile_id: Vector2i)
@@ -33,7 +37,9 @@ signal fog_state_changed(explored_ratio: float, visible_count: int, unknown_coun
 var init_state: int = MapInitState.NOT_STARTED
 # WorldEnvironment 由 _ensure_environment 动态创建，不使用 @onready
 
-var _selection_marker: MeshInstance3D
+var _selection_marker: MultiMeshInstance3D
+var _selection_marker_mesh: BoxMesh
+var _selection_highlight_cells: Array[Vector2i] = []
 var _selected_city_id := ""
 var _selected_resource_id := ""
 var _selected_building_id := ""
@@ -41,6 +47,8 @@ var _selected_building_id := ""
 # 建造系统（_ready 中创建，管理器负责数据与校验，控制器负责建造模式状态）
 var building_manager: MapBuildingManager
 var construction: MapConstructionController
+# 土地平整模式控制器（建造系统的扩展模式，与建造模式互斥）
+var terrain_flatten: MapTerrainFlattenController
 var _player_context: DemoPlayerContext
 
 
@@ -100,6 +108,8 @@ func get_tile_snapshot(tile_id: Vector2i) -> Dictionary:
 		"tile_id": tile.grid_position,
 		"terrain": MapTileTypes.get_display_name(tile.terrain_type),
 		"height": tile.height,
+		# 逻辑高度等级（阶梯等级 = 原始高度 / HEIGHT_STEP），供格子信息 UI 显示
+		"height_level": map_controller.map_data.get_height_level_at_grid(tile_id),
 		"slope": tile.slope,
 		"forest_density": tile.forest_density,
 		"river_mask": tile.river_mask,
@@ -184,6 +194,10 @@ func select_at_viewport_position(viewport_position: Vector2) -> void:
 	if is_build_mode_active():
 		construction.handle_map_click(grid_position)
 		return
+	# 土地平整模式下点击用于移动平整锚点，不触发原有选择与信息 UI
+	if is_flatten_mode_active():
+		terrain_flatten.handle_map_click(grid_position)
+		return
 	var city := map_controller.get_city_at_grid(grid_position)
 	if city != null:
 		_select_city(city)
@@ -209,8 +223,14 @@ func _setup_construction_system() -> void:
 	construction.name = "ConstructionController"
 	add_child(construction)
 	construction.setup(self, building_manager)
+	terrain_flatten = MapTerrainFlattenController.new()
+	terrain_flatten.name = "TerrainFlattenController"
+	add_child(terrain_flatten)
+	terrain_flatten.setup(map_controller, building_manager)
+	terrain_flatten.terrain_flattened.connect(_on_terrain_flattened)
 	if _player_context != null:
 		construction.set_player_context(_player_context)
+		terrain_flatten.set_player_context(_player_context)
 
 
 ## 注入玩家上下文（由 MapArea 转发），供建造归属阵营判断
@@ -218,13 +238,27 @@ func set_player_context(ctx: DemoPlayerContext) -> void:
 	_player_context = ctx
 	if construction != null:
 		construction.set_player_context(ctx)
+	if terrain_flatten != null:
+		terrain_flatten.set_player_context(ctx)
 
 
 ## ——— 建造模式公开 API（供 HUD 调用） ———
 
-func enter_build_mode() -> void:
+## 进入建造模式。definition 为空时使用默认测试建筑；rotation_index 继承选择栏方向。
+func enter_build_mode(definition: MapBuildingDefinition = null, rotation_index: int = 0) -> void:
+	# 与土地平整模式互斥：进入建造前先退出平整
+	if terrain_flatten != null and terrain_flatten.is_flatten_mode:
+		terrain_flatten.exit_flatten_mode()
 	if construction != null:
-		construction.enter_build_mode(MapBuildingDefinition.create_test_building())
+		if definition == null:
+			definition = MapBuildingDefinition.create_test_building()
+		construction.enter_build_mode(definition, rotation_index)
+
+
+## 地图建造阶段旋转（PREVIEW / LOCKED 均允许，锚点格不变）
+func rotate_building() -> void:
+	if construction != null:
+		construction.rotate_building()
 
 
 func exit_build_mode() -> void:
@@ -244,6 +278,59 @@ func confirm_build_mode() -> Dictionary:
 
 func get_construction_controller() -> MapConstructionController:
 	return construction
+
+
+## ——— 土地平整模式公开 API（供 HUD 经 MapArea 调用） ———
+
+## 进入土地平整模式。默认目标高度取当前视角中心格子的高度等级，
+## 使默认行为是“把周围土地平整到当前中心格子的高度”。
+func enter_flatten_mode() -> void:
+	if terrain_flatten == null or map_controller.map_data == null:
+		return
+	# 与建造模式互斥：进入平整前先退出建造，建筑选择状态由 HUD 的选择栏保留
+	if construction != null and construction.is_build_mode:
+		construction.exit_build_mode()
+	map_input_controller.cancel_active_gestures()
+	var camera_grid := camera_rig.get_target_grid(map_controller.map_data)
+	var default_level := map_controller.map_data.get_height_level_at_grid(camera_grid)
+	terrain_flatten.enter_flatten_mode(default_level)
+
+
+func exit_flatten_mode() -> void:
+	if terrain_flatten != null:
+		terrain_flatten.exit_flatten_mode()
+
+
+func is_flatten_mode_active() -> bool:
+	return terrain_flatten != null and terrain_flatten.is_flatten_mode
+
+
+func get_terrain_flatten_controller() -> MapTerrainFlattenController:
+	return terrain_flatten
+
+
+## 平整模式悬停拾取：与建造预览复用同一条射线求交路径
+func hover_flatten_position(viewport_position: Vector2) -> void:
+	if not is_flatten_mode_active():
+		return
+	if init_state != MapInitState.READY or map_controller.map_data == null:
+		return
+	var hit_variant: Variant = camera_rig.screen_to_ground(
+		viewport_position,
+		map_controller.map_data
+	)
+	if hit_variant == null:
+		return
+	var grid_position := map_controller.map_data.world_to_grid(hit_variant as Vector3)
+	if not map_controller.map_data.is_valid_grid(grid_position):
+		return
+	terrain_flatten.hover_at_grid(grid_position)
+
+
+## 平整完成后刷新选中高亮贴地高度（选中数据不变，仅视觉贴合新地形）
+func _on_terrain_flattened(_result: Dictionary) -> void:
+	if not _selection_highlight_cells.is_empty():
+		show_selection_highlight(_selection_highlight_cells)
 
 
 ## 删除建筑统一入口（UI 经 MapArea 转发到此，最终由 MapBuildingManager 完成业务校验与执行）。
@@ -293,8 +380,8 @@ func request_scout_at_viewport_position(viewport_position: Vector2) -> void:
 	## 发出中立侦察请求。地图只做格子拾取，不实现正式侦察逻辑。
 	if init_state != MapInitState.READY or map_controller.map_data == null:
 		return
-	# 建造模式下点击用于选择建造位置，不触发侦察
-	if is_build_mode_active():
+	# 建造/平整模式下点击用于选择目标位置，不触发侦察
+	if is_build_mode_active() or is_flatten_mode_active():
 		return
 	var hit_variant: Variant = camera_rig.screen_to_ground(
 		viewport_position,
@@ -309,11 +396,15 @@ func request_scout_at_viewport_position(viewport_position: Vector2) -> void:
 
 
 func _select_building(building: MapBuildingData) -> void:
+	if building == null or not _is_grid_object_visible(building.origin_cell):
+		clear_selection()
+		return
 	_selected_city_id = ""
 	_selected_resource_id = ""
 	_selected_building_id = building.building_id
 	map_controller.set_selected_city("")
-	_place_selection_marker(building.origin_cell, false, building.footprint_size)
+	# 正式保存的 occupied_cells 是唯一范围真值，不根据模型或 footprint 重新猜测。
+	show_selection_highlight(building.occupied_cells)
 	last_hit_grid = building.origin_cell
 	building_selected.emit(building.building_id, building.origin_cell)
 
@@ -323,7 +414,11 @@ func clear_selection() -> void:
 	_selected_resource_id = ""
 	_selected_building_id = ""
 	map_controller.set_selected_city("")
-	_selection_marker.visible = false
+	_selection_highlight_cells.clear()
+	if _selection_marker != null:
+		_selection_marker.visible = false
+		if _selection_marker.multimesh != null:
+			_selection_marker.multimesh.instance_count = 0
 	selection_cleared.emit()
 
 
@@ -356,8 +451,12 @@ func get_debug_snapshot() -> Dictionary:
 
 
 func _select_city(city: MapCityData) -> void:
+	if city == null or not _is_grid_object_visible(city.grid_position):
+		clear_selection()
+		return
 	_selected_city_id = city.city_id
 	_selected_resource_id = ""
+	_selected_building_id = ""
 	map_controller.set_selected_city(city.city_id)
 	_place_selection_marker(city.grid_position, true)
 	last_hit_grid = city.grid_position
@@ -365,8 +464,12 @@ func _select_city(city: MapCityData) -> void:
 
 
 func _select_resource(resource_point: MapResourcePointData) -> void:
+	if resource_point == null or not _is_grid_object_visible(resource_point.grid_position):
+		clear_selection()
+		return
 	_selected_city_id = ""
 	_selected_resource_id = resource_point.resource_id
+	_selected_building_id = ""
 	map_controller.set_selected_city("")
 	_place_selection_marker(resource_point.grid_position, false, Vector2i(3, 3))
 	last_hit_grid = resource_point.grid_position
@@ -376,6 +479,7 @@ func _select_resource(resource_point: MapResourcePointData) -> void:
 func _select_tile(grid_position: Vector2i) -> void:
 	_selected_city_id = ""
 	_selected_resource_id = ""
+	_selected_building_id = ""
 	map_controller.set_selected_city("")
 	_place_selection_marker(grid_position, false)
 	last_hit_grid = grid_position
@@ -387,38 +491,90 @@ func _place_selection_marker(
 	is_city: bool,
 	requested_footprint: Vector2i = Vector2i.ONE
 ) -> void:
-	var marker_grid_position := grid_position
-	var footprint_size := requested_footprint
 	if is_city:
 		var city := map_controller.get_city_at_grid(grid_position)
 		if city != null:
-			marker_grid_position = city.grid_position
-			footprint_size = city.footprint_size
-	_selection_marker.position = map_controller.map_data.grid_to_world(
-		marker_grid_position,
-		map_controller.map_data.get_surface_height_at_grid(marker_grid_position) + 0.08
+			show_selection_highlight(city.get_occupied_cells())
+			return
+	var cells: Array[Vector2i] = []
+	var safe_size := Vector2i(maxi(1, requested_footprint.x), maxi(1, requested_footprint.y))
+	var half_size := Vector2i(
+		floori(float(safe_size.x) * 0.5),
+		floori(float(safe_size.y) * 0.5)
 	)
-	_selection_marker.scale = Vector3(
-		float(footprint_size.x),
-		1.0,
-		float(footprint_size.y)
+	var rect := Rect2i(grid_position - half_size, safe_size)
+	for y in range(rect.position.y, rect.end.y):
+		for x in range(rect.position.x, rect.end.x):
+			cells.append(Vector2i(x, y))
+	show_selection_highlight(cells)
+
+
+## 现有选中高亮的统一入口。每个格子独立贴合阶梯表面，不产生碰撞。
+func show_selection_highlight(cells: Array[Vector2i]) -> void:
+	if _selection_marker == null or map_controller == null or map_controller.map_data == null:
+		return
+	var map_data := map_controller.map_data
+	var unique_cells: Dictionary = {}
+	_selection_highlight_cells.clear()
+	for cell in cells:
+		if map_data.is_valid_grid(cell) and not unique_cells.has(cell):
+			unique_cells[cell] = true
+			_selection_highlight_cells.append(cell)
+	if _selection_highlight_cells.is_empty():
+		_selection_marker.multimesh.instance_count = 0
+		_selection_marker.visible = false
+		return
+	_selection_marker_mesh.size = Vector3(
+		map_data.cell_size * SELECTION_HIGHLIGHT_CELL_SCALE,
+		SELECTION_HIGHLIGHT_THICKNESS,
+		map_data.cell_size * SELECTION_HIGHLIGHT_CELL_SCALE
 	)
+	_selection_marker.multimesh.instance_count = _selection_highlight_cells.size()
+	for index in range(_selection_highlight_cells.size()):
+		var cell := _selection_highlight_cells[index]
+		var world_position := map_data.grid_to_world(
+			cell,
+			map_data.get_surface_height_at_grid(cell) + SELECTION_HIGHLIGHT_Y_OFFSET
+		)
+		_selection_marker.multimesh.set_instance_transform(
+			index,
+			Transform3D(Basis.IDENTITY, world_position)
+		)
 	_selection_marker.visible = true
 
 
+func get_selection_highlight_cells() -> Array[Vector2i]:
+	return _selection_highlight_cells.duplicate()
+
+
+## 与现有地图实体显示规则保持一致：迷雾关闭时可见，开启时 UNKNOWN 不可选中。
+func _is_grid_object_visible(grid_position: Vector2i) -> bool:
+	if map_controller == null or map_controller.map_data == null or not map_controller.fog_enabled:
+		return true
+	var fog := map_controller.map_data.fog_data
+	return (
+		fog == null
+		or not fog.is_unknown(grid_position, map_controller.current_fog_faction_id)
+	)
+
+
 func _build_selection_marker() -> void:
-	_selection_marker = MeshInstance3D.new()
+	_selection_marker = MultiMeshInstance3D.new()
 	_selection_marker.name = "SelectionMarker"
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3(1.82, 0.04, 1.82)
+	_selection_marker_mesh = BoxMesh.new()
+	_selection_marker_mesh.size = Vector3(1.82, SELECTION_HIGHLIGHT_THICKNESS, 1.82)
 	var material := StandardMaterial3D.new()
 	material.albedo_color = Color(0.95, 0.72, 0.25, 0.58)
 	material.emission_enabled = true
 	material.emission = Color(0.95, 0.62, 0.18)
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mesh.material = material
-	_selection_marker.mesh = mesh
+	_selection_marker_mesh.material = material
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.mesh = _selection_marker_mesh
+	multimesh.instance_count = 0
+	_selection_marker.multimesh = multimesh
 	_selection_marker.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_selection_marker.visible = false
 	selection_root.add_child(_selection_marker)
@@ -573,8 +729,30 @@ func _emit_fog_state() -> void:
 	var fog := map_controller.map_data.fog_data if map_controller.map_data != null else null
 	if fog == null:
 		return
+	_clear_selection_if_hidden_by_fog()
 	fog_state_changed.emit(
 		fog.get_explored_ratio(),
 		fog.get_visible_count(),
 		fog.get_unknown_count()
 	)
+
+
+## 只复核表现层选中状态，不修改迷雾数据；对象回到 UNKNOWN 后立即移除高亮。
+func _clear_selection_if_hidden_by_fog() -> void:
+	var selected_grid: Variant = null
+	if not _selected_building_id.is_empty() and building_manager != null:
+		var building := building_manager.get_building_by_id(_selected_building_id)
+		if building != null:
+			selected_grid = building.origin_cell
+	elif not _selected_city_id.is_empty():
+		var city := map_controller.get_city_by_id(_selected_city_id)
+		if city != null:
+			selected_grid = city.grid_position
+	elif not _selected_resource_id.is_empty():
+		var resource_point := map_controller.get_resource_by_id(_selected_resource_id)
+		if resource_point != null:
+			selected_grid = resource_point.grid_position
+	elif _selection_marker != null and _selection_marker.visible:
+		selected_grid = last_hit_grid
+	if selected_grid != null and not _is_grid_object_visible(selected_grid as Vector2i):
+		clear_selection()

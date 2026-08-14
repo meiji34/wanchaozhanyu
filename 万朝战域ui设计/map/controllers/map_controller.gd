@@ -448,6 +448,57 @@ func set_battle_tree_density_scale(scale: float) -> void:
 	battle_tree_density_scale = clampf(scale, 0.0, 1.0)
 
 
+## ——— 土地平整（数据层正式入口） ———
+## 将指定格子统一调整到目标高度等级，并只重建受影响的 Chunk（含相邻一圈，保证侧面衔接）。
+## 业务合法性（河流/道路/城池/建筑/迷雾等）由 TerrainFlattenController 在调用前校验，
+## 此处仍做最终的边界复核；本方法不触碰任何迷雾探索数据。
+func flatten_terrain(cells: Array[Vector2i], target_height_level: int) -> Dictionary:
+	if map_data == null:
+		return {"success": false, "reason": "地图数据尚未就绪", "changed_cells": []}
+	for cell in cells:
+		if not map_data.is_valid_grid(cell):
+			return {"success": false, "reason": "平整范围超出地图边界", "changed_cells": []}
+	var changed_cells: Array[Vector2i] = []
+	for cell in cells:
+		if map_data.get_height_level_at_grid(cell) != target_height_level:
+			map_data.set_height_level_at_grid(cell, target_height_level)
+			changed_cells.append(cell)
+	if not changed_cells.is_empty():
+		# 高度范围缓存影响射线拾取边界，平整后必须重算
+		map_data.recalculate_height_range()
+		# 坡度与可建造标记是高度的派生数据：只刷新修改格及其相邻一圈
+		#（坡度由中心差分得出，依赖邻格高度），不刷新整张地图
+		var surface_refresh: Dictionary = {}
+		for cell in changed_cells:
+			for offset_y in range(-1, 2):
+				for offset_x in range(-1, 2):
+					surface_refresh[cell + Vector2i(offset_x, offset_y)] = true
+		for cell_variant in surface_refresh.keys():
+			map_data.refresh_tile_surface_at(cell_variant as Vector2i)
+		_rebuild_chunks_around_cells(changed_cells)
+	print("[Flatten] 土地平整完成：cells=%d changed=%d target_level=%d" % [
+		cells.size(), changed_cells.size(), target_height_level
+	])
+	return {"success": true, "reason": "", "changed_cells": changed_cells}
+
+
+## 局部刷新：只重建包含被修改格子及其相邻一圈格子的活跃 Chunk。
+## Chunk.configure 会从 map_data 完整重建地形 Mesh、碰撞、道路、森林与迷雾覆盖层，
+## 侧面 Mesh 依赖邻格高度，因此邻接 Chunk 也必须包含在内。
+## 缓存中的 Chunk 重新加载时会重新 configure，自动读取最新数据，无需处理。
+func _rebuild_chunks_around_cells(cells: Array[Vector2i]) -> void:
+	var affected_chunks: Dictionary = {}
+	for cell in cells:
+		for offset_y in range(-1, 2):
+			for offset_x in range(-1, 2):
+				affected_chunks[map_data.grid_to_chunk(cell + Vector2i(offset_x, offset_y))] = true
+	for coordinate_variant in affected_chunks.keys():
+		var coordinate := coordinate_variant as Vector2i
+		var chunk := active_chunks.get(coordinate) as MapChunk
+		if chunk != null and is_instance_valid(chunk):
+			chunk.configure(map_data, coordinate, chunk.lod_level)
+
+
 func get_fog_debug_snapshot() -> Dictionary:
 	var fog := map_data.fog_data if map_data != null else null
 	if fog == null:

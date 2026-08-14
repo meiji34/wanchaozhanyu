@@ -163,11 +163,16 @@ func test_generator_produces_required_demo_content() -> void:
 		MapTileTypes.Zone.CENTRAL
 	)
 	for city in data.cities:
-		assert_eq(city.footprint_size, Vector2i(13, 13), "每座城池必须占用 13×13 格")
+		var expected_footprint := (
+			MapCityData.DEFAULT_FOOTPRINT_SIZE * MapCityData.CENTRAL_FOOTPRINT_MULTIPLIER
+			if city.city_role == MapCityData.Role.CENTRAL_CAPITAL
+			else MapCityData.DEFAULT_FOOTPRINT_SIZE
+		)
+		assert_eq(city.footprint_size, expected_footprint, "主城必须保存各自真实占地")
 		assert_eq(
 			city.get_world_footprint_size(data.cell_size),
-			Vector2(26.0, 26.0),
-			"单格 2 世界单位时城池占地必须为 26×26 世界单位"
+			Vector2(expected_footprint) * data.cell_size,
+			"主城世界占地必须与真实 footprint 一致"
 		)
 		var occupied_rect := city.get_occupied_grid_rect()
 		for grid_y in range(occupied_rect.position.y, occupied_rect.end.y):
@@ -355,6 +360,73 @@ func test_all_road_types_are_smoothed_and_bridges_have_uvs() -> void:
 		var uvs := arrays[Mesh.ARRAY_TEX_UV] as PackedVector2Array
 		assert_eq(vertices.size(), expected_bridge_cell_count * 4)
 		assert_eq(uvs.size(), vertices.size(), "桥梁网格必须携带连续贴图 UV")
+
+
+func test_bridge_footprints_are_rectangular_and_connect_both_banks() -> void:
+	var data := _get_generated_map_data()
+	var bridge_count := 0
+	for crossing in data.crossings:
+		if str(crossing.get("crossing_type", "")) != "bridge":
+			continue
+		bridge_count += 1
+		var cells := crossing.get("occupied_cells", []) as Array
+		var footprint_size := crossing.get("footprint_size", Vector2i.ZERO) as Vector2i
+		var axis := crossing.get("bridge_axis", Vector2i.ZERO) as Vector2i
+		assert_gt(cells.size(), 0, "桥梁必须保存明确 occupied_cells")
+		assert_true(axis == Vector2i.RIGHT or axis == Vector2i.DOWN, "桥梁长轴必须为稳定格子主轴")
+		assert_eq(
+			cells.size(), footprint_size.x * footprint_size.y,
+			"桥梁 occupied_cells 数量必须等于矩形面积"
+		)
+		if cells.is_empty():
+			continue
+		var min_grid := cells[0] as Vector2i
+		var max_grid := min_grid
+		var cell_set: Dictionary = {}
+		var water_count := 0
+		for cell_variant in cells:
+			var cell := cell_variant as Vector2i
+			cell_set[cell] = true
+			min_grid.x = mini(min_grid.x, cell.x)
+			min_grid.y = mini(min_grid.y, cell.y)
+			max_grid.x = maxi(max_grid.x, cell.x)
+			max_grid.y = maxi(max_grid.y, cell.y)
+			if data.get_terrain_type_at(cell) == MapTileTypes.Terrain.RIVER:
+				water_count += 1
+			assert_true(data.has_road_at(cell), "桥面矩形内每格必须保持道路连续")
+			assert_true(data.get_city_at_grid(cell) == null, "桥梁不得覆盖主城")
+			assert_true(data.get_resource_at_grid(cell) == null, "桥梁不得覆盖特殊资源点")
+		var bounds_size := max_grid - min_grid + Vector2i.ONE
+		assert_eq(bounds_size, footprint_size, "桥梁包围矩形必须与 footprint_size 一致")
+		for y in range(min_grid.y, max_grid.y + 1):
+			for x in range(min_grid.x, max_grid.x + 1):
+				assert_true(cell_set.has(Vector2i(x, y)), "桥梁矩形不得缺格或形成锯齿")
+		assert_gt(water_count, 0, "桥梁必须实际跨越水域")
+		var expected_width := _get_expected_road_width(int(crossing.get("road_type", 0)))
+		assert_eq(int(crossing.get("bridge_width", 0)), expected_width, "桥梁全长宽度保持道路配置值")
+		if axis.x != 0:
+			for y in range(min_grid.y, max_grid.y + 1):
+				assert_ne(data.get_terrain_type_at(Vector2i(min_grid.x, y)), MapTileTypes.Terrain.RIVER)
+				assert_ne(data.get_terrain_type_at(Vector2i(max_grid.x, y)), MapTileTypes.Terrain.RIVER)
+		else:
+			for x in range(min_grid.x, max_grid.x + 1):
+				assert_ne(data.get_terrain_type_at(Vector2i(x, min_grid.y)), MapTileTypes.Terrain.RIVER)
+				assert_ne(data.get_terrain_type_at(Vector2i(x, max_grid.y)), MapTileTypes.Terrain.RIVER)
+	assert_gt(bridge_count, 0, "测试地图必须至少生成一座矩形桥梁")
+
+
+func _get_expected_road_width(road_type: int) -> int:
+	match road_type:
+		MapTileTypes.RoadType.MAIN:
+			return MapGenerationConfig.MAIN_ROAD_WIDTH
+		MapTileTypes.RoadType.NORMAL:
+			return MapGenerationConfig.NORMAL_ROAD_WIDTH
+		MapTileTypes.RoadType.RING:
+			return MapGenerationConfig.RING_ROAD_WIDTH
+		MapTileTypes.RoadType.HIDDEN:
+			return MapGenerationConfig.HIDDEN_PATH_WIDTH
+		_:
+			return 1
 
 
 func _get_reachable_cells(cells: Dictionary, start: Vector2i) -> Dictionary:

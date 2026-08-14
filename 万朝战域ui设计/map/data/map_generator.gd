@@ -1,6 +1,10 @@
 class_name DemoMapGenerator
 extends RefCounted
 
+const BRIDGE_BANK_SEARCH_LIMIT := 32
+const BRIDGE_BANK_CONFIRM_DEPTH := 2
+const BRIDGE_LAND_EXTENSION := 1
+
 const STRATEGIC_CITIES: Array[Dictionary] = [
 	{
 		"id": "forest_capital",
@@ -385,19 +389,53 @@ static func _generate_crossings(data: DemoMapData) -> void:
 			if not carries_main_road and index == selected_components.size() - 1
 			else "bridge"
 		)
+		var road_type := (
+			MapTileTypes.RoadType.MAIN
+			if carries_main_road
+			else data.get_road_type_at(center)
+		)
+		var occupied_cells: Array = component.duplicate()
+		var footprint_size := Vector2i.ZERO
+		var bridge_axis := Vector2i.ZERO
+		if kind == "bridge":
+			var footprint_result := _build_bridge_footprint(data, component, road_type)
+			if not bool(footprint_result.get("success", false)):
+				push_warning(
+					"桥梁生成失败，已跳过半截或冲突 footprint：%s" %
+					str(footprint_result.get("reason", "无法连接两岸"))
+				)
+				continue
+			occupied_cells = footprint_result.get("cells", []) as Array
+			footprint_size = footprint_result.get("footprint_size", Vector2i.ZERO) as Vector2i
+			bridge_axis = footprint_result.get("axis", Vector2i.ZERO) as Vector2i
+			# 桥面矩形内必须有连续道路数据，岸侧延伸格也沿用当前道路类型。
+			for cell_variant in occupied_cells:
+				var cell := cell_variant as Vector2i
+				var current_road_type := data.get_road_type_at(cell)
+				if (
+					current_road_type == MapTileTypes.RoadType.NONE
+					or MapTileTypes.get_road_priority(road_type)
+						> MapTileTypes.get_road_priority(current_road_type)
+				):
+					data.set_road_type_at(cell, road_type)
 		var crossing := {
 			"crossing_id": "crossing_%d" % (index + 1),
 			"display_name": "浅滩" if kind == "ford" else "桥梁",
 			"grid_position": center,
 			"crossing_type": kind,
 			"selection_radius": 3,
-			"cell_count": component.size(),
-			"road_type": MapTileTypes.RoadType.MAIN if carries_main_road else data.get_road_type_at(center),
+			"cell_count": occupied_cells.size(),
+			"occupied_cells": occupied_cells.duplicate(),
+			"footprint_size": footprint_size,
+			"bridge_axis": bridge_axis,
+			"bridge_width": mini(footprint_size.x, footprint_size.y),
+			"bridge_length": maxi(footprint_size.x, footprint_size.y),
+			"road_type": road_type,
 			"road_direction": _get_component_road_direction(component),
 			"visual_mode": "textured_deck_placeholder" if kind == "bridge" else "ford_placeholder",
 			"model_scene_path": "",
 		}
-		data.add_crossing(crossing, component)
+		data.add_crossing(crossing, occupied_cells)
 
 
 static func _component_has_main_road(data: DemoMapData, component: Array) -> bool:
@@ -441,6 +479,110 @@ static func _get_component_center(component: Array) -> Vector2i:
 			best = point
 			best_distance = distance
 	return best
+
+
+## 将现有道路/河流连通块整理成固定宽度、连续长度的矩形桥面。
+## 连通块只用于中心和方向推导，最终 occupied_cells 不再追随不规则岸线逐格生长。
+static func _build_bridge_footprint(
+	data: DemoMapData,
+	component: Array,
+	road_type: int
+) -> Dictionary:
+	if component.is_empty():
+		return {"success": false, "reason": "过河连通块为空"}
+	var center := _get_component_center(component)
+	var direction := _get_component_road_direction(component)
+	var axis := (
+		Vector2i.RIGHT
+		if absf(direction.x) >= absf(direction.y)
+		else Vector2i.DOWN
+	)
+	var short_axis := Vector2i(-axis.y, axis.x)
+	var width := _get_road_width(road_type)
+	var negative_distance := _find_bridge_bank_distance(
+		data, center, -axis, short_axis, width
+	)
+	var positive_distance := _find_bridge_bank_distance(
+		data, center, axis, short_axis, width
+	)
+	if negative_distance < 0 or positive_distance < 0:
+		return {"success": false, "reason": "在搜索上限内未找到稳定的两岸陆地"}
+
+	var min_short_offset := -floori(float(width - 1) * 0.5)
+	var max_short_offset := ceili(float(width - 1) * 0.5)
+	var cells: Array[Vector2i] = []
+	for long_offset in range(-negative_distance, positive_distance + 1):
+		for short_offset in range(min_short_offset, max_short_offset + 1):
+			var cell := center + axis * long_offset + short_axis * short_offset
+			if not data.is_valid_grid(cell):
+				return {"success": false, "reason": "桥面矩形超出地图边界"}
+			if _is_bridge_cell_blocked(data, cell):
+				return {"success": false, "reason": "桥面矩形与已有特殊对象冲突：%s" % cell}
+			cells.append(cell)
+	var length := negative_distance + positive_distance + 1
+	return {
+		"success": true,
+		"cells": cells,
+		"axis": axis,
+		"footprint_size": Vector2i(length, width) if axis.x != 0 else Vector2i(width, length),
+	}
+
+
+## 沿桥梁长轴寻找第一段稳定陆地，并保留配置数量的岸侧连接格。
+static func _find_bridge_bank_distance(
+	data: DemoMapData,
+	center: Vector2i,
+	direction: Vector2i,
+	short_axis: Vector2i,
+	width: int
+) -> int:
+	var min_short_offset := -floori(float(width - 1) * 0.5)
+	var max_short_offset := ceili(float(width - 1) * 0.5)
+	var saw_water := false
+	var first_land_distance := -1
+	var consecutive_land_sections := 0
+	for distance in range(BRIDGE_BANK_SEARCH_LIMIT + 1):
+		var section_has_water := false
+		for short_offset in range(min_short_offset, max_short_offset + 1):
+			var cell := center + direction * distance + short_axis * short_offset
+			if not data.is_valid_grid(cell):
+				return -1
+			if data.get_terrain_type_at(cell) == MapTileTypes.Terrain.RIVER:
+				section_has_water = true
+		if section_has_water:
+			saw_water = true
+			first_land_distance = -1
+			consecutive_land_sections = 0
+		elif saw_water:
+			if first_land_distance < 0:
+				first_land_distance = distance
+			consecutive_land_sections += 1
+			if consecutive_land_sections >= BRIDGE_BANK_CONFIRM_DEPTH:
+				return first_land_distance + BRIDGE_LAND_EXTENSION - 1
+	return -1
+
+
+static func _get_road_width(road_type: int) -> int:
+	match road_type:
+		MapTileTypes.RoadType.MAIN:
+			return MapGenerationConfig.MAIN_ROAD_WIDTH
+		MapTileTypes.RoadType.NORMAL:
+			return MapGenerationConfig.NORMAL_ROAD_WIDTH
+		MapTileTypes.RoadType.RING:
+			return MapGenerationConfig.RING_ROAD_WIDTH
+		MapTileTypes.RoadType.HIDDEN:
+			return MapGenerationConfig.HIDDEN_PATH_WIDTH
+		_:
+			return 1
+
+
+## 桥梁扩大时继续服从现有静态地图对象冲突规则。
+static func _is_bridge_cell_blocked(data: DemoMapData, cell: Vector2i) -> bool:
+	return (
+		data.get_city_at_grid(cell) != null
+		or data.get_resource_at_grid(cell) != null
+		or not data.get_crossing_type_at(cell).is_empty()
+	)
 
 
 static func _apply_city_site_overrides(data: DemoMapData) -> void:

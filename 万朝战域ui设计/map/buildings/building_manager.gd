@@ -48,7 +48,8 @@ func get_map_data() -> DemoMapData:
 func validate_placement(
 	definition: MapBuildingDefinition,
 	origin_cell: Vector2i,
-	faction_id: int
+	faction_id: int,
+	rotation_index: int = 0
 ) -> Dictionary:
 	var result := {
 		"valid": false,
@@ -60,7 +61,8 @@ func validate_placement(
 	if definition == null or map_data == null:
 		result["reason"] = "建造系统尚未就绪"
 		return result
-	var cells := definition.get_footprint_cells(origin_cell)
+	# 旋转后占地（如 3×4 → 4×3）由定义统一推导，校验、预览、正式放置共用同一组格子
+	var cells := definition.get_footprint_cells(origin_cell, rotation_index)
 	result["occupied_cells"] = cells
 	# 地基高度默认取基准格表面高度，保证非法位置下预览也能贴合地形显示
 	if map_data.is_valid_grid(origin_cell):
@@ -71,7 +73,8 @@ func validate_placement(
 		if not map_data.is_valid_grid(cell):
 			result["reason"] = "占地区域超出地图边界"
 			return result
-	# 2. 地形类型：复用既有可建造标记（水面、山地等已标记为不可建造）
+	# 2. 地形类型：复用既有可建造标记（水面等绝对不可施工地形）
+	# 山地不做类型限制：地面平整要求由下方“等高”校验按真实高度动态判定
 	for cell in cells:
 		if not map_data.is_buildable_at(cell):
 			result["reason"] = "占地区域包含不可建造地形"
@@ -92,6 +95,13 @@ func validate_placement(
 	for cell in cells:
 		if map_data.get_resource_at_grid(cell) != null:
 			result["reason"] = "占地区域与资源点重叠"
+			return result
+	# 5.5 道路：占地中任意格子属于道路（含桥梁路段）即整体不可建造。
+	# 复用权威道路数据（road_types 数组，has_road_at 查询），预览与最终放置共用本校验；
+	# 检查顺序位于城池/资源点之后，保证已有的占用原因优先报告。
+	for cell in cells:
+		if map_data.has_road_at(cell):
+			result["reason"] = "占地区域包含道路"
 			return result
 	# 6. 已被其他建筑占用或施工预留
 	for cell in cells:
@@ -121,9 +131,10 @@ func validate_placement(
 func place_building(
 	definition: MapBuildingDefinition,
 	origin_cell: Vector2i,
-	faction_id: int
+	faction_id: int,
+	rotation_index: int = 0
 ) -> Dictionary:
-	var check := validate_placement(definition, origin_cell, faction_id)
+	var check := validate_placement(definition, origin_cell, faction_id, rotation_index)
 	if not bool(check.get("valid", false)):
 		return {"success": false, "reason": str(check.get("reason", "当前位置不可建造"))}
 
@@ -133,6 +144,7 @@ func place_building(
 	building.display_name = definition.display_name
 	building.origin_cell = origin_cell
 	building.footprint_size = definition.footprint_size
+	building.rotation_index = MapBuildingDefinition.normalize_rotation_index(rotation_index)
 	building.height_levels = definition.height_levels
 	building.foundation_height = float(check["foundation_height"])
 	building.owner_faction_id = faction_id
@@ -143,8 +155,9 @@ func place_building(
 	for cell in building.occupied_cells:
 		_occupied_cells[cell] = building.building_id
 	_spawn_building_visual(building)
-	print("[Build] 已放置建筑 id=%s cell=%s faction=%d cells=%d" % [
-		building.building_id, building.origin_cell, faction_id, building.occupied_cells.size()
+	print("[Build] 已放置建筑 id=%s cell=%s faction=%d rotation=%d cells=%d" % [
+		building.building_id, building.origin_cell, faction_id,
+		building.rotation_index, building.occupied_cells.size()
 	])
 	building_created.emit(building.building_id)
 	return {
@@ -234,6 +247,8 @@ func _allocate_building_id() -> String:
 
 ## 生成正式占位建筑：不透明立方体，底面贴合阶梯地形表面。
 ## BoxMesh 原点位于几何中心，因此中心 Y = 地基高度 + 建筑高度 / 2。
+## 网格按基础占地尺寸构建，方向通过节点 Y 轴旋转呈现（与 Preview 同一换算入口）；
+## 占地业务真值仍以 building.occupied_cells（旋转后）为准，二者由同一锚点函数保证一致。
 func _spawn_building_visual(building: MapBuildingData) -> void:
 	var map_data := get_map_data()
 	if map_data == null:
@@ -257,6 +272,7 @@ func _spawn_building_visual(building: MapBuildingData) -> void:
 		building.get_footprint_center(),
 		building.foundation_height + world_size.y * 0.5
 	)
+	node.rotation.y = MapBuildingDefinition.rotation_index_to_y_rotation(building.rotation_index)
 	# 轻量阵营识别：建筑底部薄底座使用既有阵营显示色（不大面积染色主体立方体）
 	var faction_color := DemoPlayerContext.get_faction_display_color(building.owner_faction_id)
 	if faction_color != Color.TRANSPARENT:

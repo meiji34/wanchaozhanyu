@@ -10,6 +10,9 @@ game_output.txt
 *.docx
 第一版Demo地图功能盘点报告.md
 地图方案.md
+MCP_SETUP.md
+MAP_AGENTS.md
+
 
 # ===== Godot 编辑器缓存 =====
 万朝战域UI设计/.godot/
@@ -21,5 +24,11 @@ tools/__pycache__/
 # ===== CodeBuddy 本地数据（个人配置，不上传）=====
 .codebuddy/
 
-# ===== 测试输出 =====
-tools/_test_out.txt
+
+# ===== 工具文件 =====
+tools/
+.codex/
+.godot-mcp/
+
+# ===== 临时文件 =====
+万朝战域ui设计/tests/

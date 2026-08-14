@@ -283,6 +283,27 @@ func set_tile_height_at(grid_position: Vector2i, value: float) -> void:
 		tile_heights[index] = value
 
 
+## 阶梯地形的“高度等级”：等级 N 对应世界高度 N × HEIGHT_STEP。
+## 等级由权威原始高度 tile_heights 推导，不引入第二套高度数据。
+func get_height_level_at_grid(grid_position: Vector2i) -> int:
+	return roundi(get_height_at_grid(grid_position) / MapGenerationConfig.HEIGHT_STEP)
+
+
+## 将格子平整到指定高度等级：写入权威原始高度（精确等于等级 × HEIGHT_STEP），
+## 并同步格子四个顶点的连续高度采样，保证高度场查询与阶梯表面保持一致。
+func set_height_level_at_grid(grid_position: Vector2i, level: int) -> void:
+	var index := get_tile_index(grid_position)
+	if index < 0:
+		return
+	var height := float(level) * MapGenerationConfig.HEIGHT_STEP
+	tile_heights[index] = height
+	var vertex_corners: Array[Vector2i] = [
+		Vector2i.ZERO, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.ONE
+	]
+	for corner in vertex_corners:
+		set_height_sample(grid_position + corner, height)
+
+
 func get_slope_at(grid_position: Vector2i) -> float:
 	var index := get_tile_index(grid_position)
 	return tile_slopes[index] if index >= 0 else 0.0
@@ -292,6 +313,38 @@ func set_slope_at(grid_position: Vector2i, value: float) -> void:
 	var index := get_tile_index(grid_position)
 	if index >= 0:
 		tile_slopes[index] = value
+
+
+## 局部地形修改（土地平整等）后，重算单格派生表面数据：坡度 + 可建造标记。
+## 坡度算法与 TerrainFieldGenerator.refresh_tile_surface_data 完全一致（中心差分，
+## 边界使用就近格子——越界邻居回退为本格高度）；可建造规则见 is_buildable_tile_state。
+## 注意：本方法只负责派生数据，不修改地形类型、道路、迷雾等任何其他状态。
+func refresh_tile_surface_at(grid_position: Vector2i) -> void:
+	var index := get_tile_index(grid_position)
+	if index < 0:
+		return
+	var left_height := _tile_height_or_self(grid_position + Vector2i.LEFT, index)
+	var right_height := _tile_height_or_self(grid_position + Vector2i.RIGHT, index)
+	var back_height := _tile_height_or_self(grid_position + Vector2i.UP, index)
+	var front_height := _tile_height_or_self(grid_position + Vector2i.DOWN, index)
+	var slope_x := (right_height - left_height) / (cell_size * 2.0)
+	var slope_z := (front_height - back_height) / (cell_size * 2.0)
+	tile_slopes[index] = Vector2(slope_x, slope_z).length()
+	buildable_flags[index] = 1 if is_buildable_tile_state(
+		int(terrain_types[index])
+	) else 0
+
+
+func _tile_height_or_self(grid_position: Vector2i, self_index: int) -> float:
+	var index := get_tile_index(grid_position)
+	return tile_heights[index] if index >= 0 else tile_heights[self_index]
+
+
+## 可建造地形状态的统一规则（生成期与平整后刷新共用）：
+## 只排除绝对不可施工的水面（河流）。山地等自然地形不再构成施工限制，
+## 地面是否满足建筑要求由建造校验按 footprint 真实高度一致性等现有条件动态判定。
+static func is_buildable_tile_state(terrain_type: int) -> bool:
+	return terrain_type != MapTileTypes.Terrain.RIVER
 
 
 func get_forest_density_at(grid_position: Vector2i) -> float:

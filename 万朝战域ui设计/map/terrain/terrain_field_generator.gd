@@ -243,9 +243,10 @@ static func refresh_tile_surface_data(data: DemoMapData) -> void:
 				data.forest_densities[index] = 0.0
 				if data.terrain_types[index] == MapTileTypes.Terrain.MOUNTAIN:
 					data.terrain_types[index] = MapTileTypes.Terrain.PLAIN
-			data.buildable_flags[index] = 1 if (
-				data.terrain_types[index] == MapTileTypes.Terrain.PLAIN
-				and data.tile_slopes[index] <= MapGenerationConfig.MAX_BUILDABLE_SLOPE
+			# 可建造标记使用与局部刷新（refresh_tile_surface_at）完全一致的规则：
+			# 只排除水面；山地不再作为施工限制，由建造校验按真实高度动态判定
+			data.buildable_flags[index] = 1 if DemoMapData.is_buildable_tile_state(
+				int(data.terrain_types[index])
 			) else 0
 
 

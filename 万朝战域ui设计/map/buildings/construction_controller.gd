@@ -27,6 +27,8 @@ var _map_world: MapWorld
 var _building_manager: MapBuildingManager
 var _player_context: DemoPlayerContext
 var _definition: MapBuildingDefinition
+## 当前旋转方向索引（0=北 1=东 2=南 3=西），进入建造模式时由选择栏继承
+var _rotation_index := 0
 var _preview: MeshInstance3D
 var _preview_valid_material: StandardMaterial3D
 var _preview_invalid_material: StandardMaterial3D
@@ -44,10 +46,12 @@ func set_player_context(ctx: DemoPlayerContext) -> void:
 
 
 ## 进入建造模式。重复进入直接忽略，避免重复状态与重复 Preview。
-func enter_build_mode(definition: MapBuildingDefinition) -> void:
+## rotation_index 继承建筑选择栏所选方向，地图 Preview 初始即按该方向显示。
+func enter_build_mode(definition: MapBuildingDefinition, rotation_index: int = 0) -> void:
 	if is_build_mode or definition == null:
 		return
 	_definition = definition
+	_rotation_index = MapBuildingDefinition.normalize_rotation_index(rotation_index)
 	_last_result = {}
 	_placement_state = PlacementState.PREVIEW
 	is_build_mode = true
@@ -56,7 +60,9 @@ func enter_build_mode(definition: MapBuildingDefinition) -> void:
 	# Preview 创建一次，后续只更新位置/高度/材质；首次选点前保持隐藏
 	_ensure_preview()
 	_preview.visible = false
-	print("[Build] 进入建造模式：%s" % definition.display_name)
+	print("[Build] 进入建造模式：%s 方向=%s" % [
+		definition.display_name, MapBuildingDefinition.get_rotation_display_name(_rotation_index)
+	])
 	build_mode_changed.emit(true)
 
 
@@ -66,6 +72,7 @@ func exit_build_mode() -> void:
 		return
 	is_build_mode = false
 	_definition = null
+	_rotation_index = 0
 	_last_result = {}
 	_placement_state = PlacementState.PREVIEW
 	# 立即释放而非 queue_free：保证退出建造模式后无残留节点，快速反复进出也不会并存两个 Preview
@@ -105,13 +112,30 @@ func is_position_locked() -> bool:
 	return is_build_mode and _placement_state == PlacementState.LOCKED
 
 
+## 当前旋转方向索引（供 HUD 显示与测试断言）
+func get_rotation_index() -> int:
+	return _rotation_index
+
+
+## 地图建造阶段旋转：0°→90°→180°→270°→0° 循环。
+## 锚点格（origin_cell）保持不变，占地/预览中心/合法性按新方向完整重算；
+## PREVIEW 与 LOCKED 状态均允许旋转（锁定后原地旋转，不解除锁定）。
+func rotate_building() -> void:
+	if not is_build_mode or _definition == null:
+		return
+	_rotation_index = MapBuildingDefinition.normalize_rotation_index(_rotation_index + 1)
+	# 已有目标格（悬停或锁定）时立即按新方向重算完整放置状态并刷新红绿
+	if not _last_result.is_empty():
+		_update_target(_last_origin)
+
+
 ## 统一更新建造目标格：校验合法性、刷新预览、通知 UI
 func _update_target(origin_cell: Vector2i) -> void:
 	if _definition == null or _building_manager == null:
 		return
 	_last_origin = origin_cell
 	_last_result = _building_manager.validate_placement(
-		_definition, origin_cell, _get_current_faction_id()
+		_definition, origin_cell, _get_current_faction_id(), _rotation_index
 	)
 	# 轻量调试日志：仅在目标格变化时输出一行（悬停去重保证不刷屏）
 	print("[BuildCheck] faction=%d cell=%s locked=%s valid=%s reason=%s" % [
@@ -121,8 +145,11 @@ func _update_target(origin_cell: Vector2i) -> void:
 		_last_result.get("valid", false),
 		_last_result.get("reason", ""),
 	])
-	# 附带锁定标记，供 UI 决定确认按钮可用性（不改变校验结果本身）
+	# 附带锁定标记与方向信息，供 UI 决定确认按钮可用性并同步方向显示（不改变校验结果本身）
 	_last_result["locked"] = _placement_state == PlacementState.LOCKED
+	_last_result["rotation_index"] = _rotation_index
+	_last_result["rotation_name"] = MapBuildingDefinition.get_rotation_display_name(_rotation_index)
+	_last_result["building_name"] = _definition.display_name
 	_update_preview(origin_cell, _last_result)
 	placement_state_changed.emit(_last_result)
 
@@ -137,7 +164,7 @@ func confirm() -> Dictionary:
 	if not bool(_last_result.get("valid", false)):
 		return {"success": false, "reason": str(_last_result.get("reason", "当前位置不可建造"))}
 	var result := _building_manager.place_building(
-		_definition, _last_origin, _get_current_faction_id()
+		_definition, _last_origin, _get_current_faction_id(), _rotation_index
 	)
 	if bool(result.get("success", false)):
 		var snapshot: Dictionary = result.get("snapshot", {})
@@ -178,8 +205,10 @@ func _ensure_preview() -> void:
 	add_child(_preview)
 
 
-## 更新预览位置、高度和材质状态。BoxMesh 原点位于几何中心，
+## 更新预览位置、高度、方向和材质状态。BoxMesh 原点位于几何中心，
 ## 因此中心 Y = 地基高度 + 预览高度 / 2，底面贴合阶梯地形表面。
+## 网格按基础占地尺寸构建，方向通过节点 Y 轴旋转呈现；
+## 预览中心按旋转后占地计算，与校验占用格始终一致。
 func _update_preview(origin_cell: Vector2i, result: Dictionary) -> void:
 	_ensure_preview()
 	var map_data := _building_manager.get_map_data()
@@ -194,9 +223,10 @@ func _update_preview(origin_cell: Vector2i, result: Dictionary) -> void:
 		mesh.size = world_size
 	var foundation := float(result.get("foundation_height", 0.0))
 	_preview.position = map_data.grid_to_world_continuous(
-		_definition.get_footprint_center(origin_cell),
+		_definition.get_footprint_center(origin_cell, _rotation_index),
 		foundation + world_size.y * 0.5
 	)
+	_preview.rotation.y = MapBuildingDefinition.rotation_index_to_y_rotation(_rotation_index)
 	mesh.material = _preview_valid_material if bool(result.get("valid", false)) else _preview_invalid_material
 	_preview.visible = true
 

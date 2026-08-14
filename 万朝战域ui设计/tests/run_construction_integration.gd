@@ -8,6 +8,7 @@ extends SceneTree
 ##   godot --headless --path <project> --script res://tests/run_construction_integration.gd
 
 var _failures: Array[String] = []
+const SELECTION_HIGHLIGHT_Y_OFFSET := 0.08
 
 
 func _init() -> void:
@@ -147,6 +148,46 @@ func _run() -> void:
 	if building != null:
 		world._select_building(building)
 		_check(selected_id["id"] == building.building_id, "点击建筑触发 building_selected 信号")
+		var building_highlight: Array[Vector2i] = world.get_selection_highlight_cells()
+		_check(
+			building_highlight.size() == building.occupied_cells.size(),
+			"普通建筑高亮完整使用 9 格 occupied_cells"
+		)
+		_check(
+			world._selection_marker.multimesh.instance_count == building.occupied_cells.size(),
+			"普通建筑逐格高亮实例数与 occupied_cells 一致"
+		)
+		for index in range(building_highlight.size()):
+			var cell: Vector2i = building_highlight[index]
+			var transform: Transform3D = world._selection_marker.multimesh.get_instance_transform(index)
+			_check(
+				is_equal_approx(
+					transform.origin.y,
+					map_data.get_surface_height_at_grid(cell) + SELECTION_HIGHLIGHT_Y_OFFSET
+				),
+				"建筑高亮格 %s 贴合阶梯表面" % cell
+			)
+
+	# 四座主城统一走真实 get_occupied_cells，高亮范围不影响原有主城类型与交互数据
+	for city in map_data.cities:
+		world._select_city(city)
+		var city_cells := city.get_occupied_cells()
+		_check(
+			world.get_selection_highlight_cells().size() == city_cells.size(),
+			"%s 高亮完整覆盖 %d 个真实占地格" % [city.display_name, city_cells.size()]
+		)
+		_check(world._selected_city_id == city.city_id, "%s 保持原有主城选择状态" % city.display_name)
+		_check(world._selected_building_id == "", "主城与普通建筑切换时清理旧建筑选择")
+	if building != null:
+		world._select_building(building)
+		_check(
+			world.get_selection_highlight_cells().size() == building.occupied_cells.size(),
+			"主城切回普通建筑后只保留当前建筑高亮"
+		)
+	world.clear_selection()
+	_check(world.get_selection_highlight_cells().is_empty(), "清空选择后无残留高亮")
+	if building != null:
+		world._select_building(building)
 
 	# ——— 9. 删除建筑：权限、释放、事件、重建 ———
 	var building_id: String = building.building_id
@@ -359,6 +400,149 @@ func _run() -> void:
 		)
 		_check(bool(reveal_revalidate.get("valid", false)), "删除后揭示区域可重新建造")
 
+	# ——— 14. 建筑方向选择与旋转（第一版） ———
+	var catalog := MapBuildingDefinition.get_building_catalog()
+	_check(catalog.size() == 2, "建筑目录包含 2 种测试建筑")
+	var definition_b := catalog[1]
+	_check(definition_b.footprint_size == Vector2i(3, 4), "建筑 B 基础占地 3×4")
+
+	# 14a. 进入建造模式继承选择栏方向（东 / 90°），Preview 初始即为 4×3
+	world.enter_build_mode(definition_b, 1)
+	_check(world.is_build_mode_active(), "携带方向进入建造模式")
+	_check(construction.get_rotation_index() == 1, "地图 Preview 继承选择栏方向 90°")
+	var origin_b := _find_valid_origin_ex(manager, definition_b, DemoPlayerContext.FactionId.FOREST, Vector2i.ZERO, 1)
+	_check(origin_b != Vector2i(999999, 999999), "在当前视野内找到合法 4×3 平整区域 %s" % origin_b)
+	construction.handle_map_click(origin_b)
+	var rot_result := construction.get_last_result()
+	_check(bool(rot_result.get("valid", false)), "90° 方向合法位置校验通过")
+	_check(int(rot_result.get("rotation_index", -1)) == 1, "校验结果携带方向索引")
+	_check(str(rot_result.get("rotation_name", "")) == "东", "校验结果携带方向名")
+	_check((rot_result.get("occupied_cells", []) as Array).size() == 12, "90° 方向占地 12 格")
+	_check(
+		is_equal_approx(construction._preview.rotation.y, PI * 0.5),
+		"地图 Preview 按 90° 旋转"
+	)
+	var base_world_size := definition_b.get_world_size(map_data.cell_size)
+	_check(
+		(construction._preview.mesh as BoxMesh).size == base_world_size,
+		"Preview 网格保持基础 3×4 尺寸（方向由节点旋转呈现）"
+	)
+	# Preview 中心 = 旋转后 4×3 占地中心（统一锚点函数，无半格偏移硬编码）
+	var expected_b_center := map_data.grid_to_world_continuous(
+		definition_b.get_footprint_center(origin_b, 1), 0.0
+	)
+	_check(
+		is_equal_approx(construction._preview.position.x, expected_b_center.x)
+		and is_equal_approx(construction._preview.position.z, expected_b_center.z),
+		"Preview 中心对齐旋转后占地中心"
+	)
+
+	# 14b. 地图阶段继续旋转：锚点格不变、占地/中心/红绿完整重算
+	construction.rotate_building()
+	_check(construction.get_rotation_index() == 2, "旋转后方向为 180°")
+	_check(construction._last_origin == origin_b, "旋转时锚点格不跳动")
+	_check(
+		is_equal_approx(construction._preview.rotation.y, PI), "Preview 旋转到 180°"
+	)
+	construction.rotate_building()
+	construction.rotate_building()
+	_check(construction.get_rotation_index() == 0, "旋转循环回到 0°")
+
+	# 14c. LOCKED 状态原地旋转：不解除锁定、不移动锚点，确认方向与占地
+	construction.handle_map_click(origin_b)
+	_check(construction.is_position_locked(), "左键锁定 90° 前的位置")
+	construction.rotate_building()
+	_check(construction.is_position_locked(), "锁定后旋转不解除锁定")
+	_check(construction._last_origin == origin_b, "锁定旋转锚点格不变")
+	_check(construction.get_rotation_index() == 1, "锁定后旋转到 90°")
+	_check(
+		bool(construction.get_last_result().get("valid", false)),
+		"锁定旋转后重新校验仍合法"
+	)
+	var placed_b := world.confirm_build_mode()
+	_check(bool(placed_b.get("success", false)), "锁定 90° 确认建造成功")
+	var building_b := manager.get_building_by_id(str(placed_b.get("building_id", "")))
+	_check(building_b != null, "旋转建筑已注册")
+	if building_b != null:
+		_check(building_b.rotation_index == 1, "正式建筑保存 rotation_index=1")
+		_check(building_b.origin_cell == origin_b, "正式建筑位于锁定锚点格")
+		_check(building_b.occupied_cells.size() == 12, "正式建筑占地 12 格")
+		_check(
+			building_b.owner_faction_id == player_context.current_faction_id,
+			"旋转建筑阵营归属正确"
+		)
+		var node_b := manager._building_nodes.get(building_b.building_id) as MeshInstance3D
+		_check(node_b != null, "旋转建筑视觉节点已生成")
+		if node_b != null:
+			_check(
+				is_equal_approx(node_b.rotation.y, PI * 0.5),
+				"正式建筑节点按 90° 旋转"
+			)
+			_check(
+				(node_b.mesh as BoxMesh).size == base_world_size,
+				"正式建筑网格保持基础尺寸"
+			)
+			# 正式建筑位置与最后一次 Preview 完全一致（同一锚点函数计算）
+			_check(
+				is_equal_approx(node_b.position.x, expected_b_center.x)
+				and is_equal_approx(node_b.position.z, expected_b_center.z),
+				"正式建筑位置与 Preview 位置一致"
+			)
+
+	# 14d. 删除旋转建筑：按保存的 occupied_cells 精确释放 12 格
+	if building_b != null:
+		var occupied_b: Array = building_b.occupied_cells.duplicate()
+		var deleted_b := world.request_delete_building(building_b.building_id)
+		_check(bool(deleted_b.get("success", false)), "旋转建筑可删除")
+		var all_freed := true
+		for cell in occupied_b:
+			if manager.is_cell_occupied_by_building(cell):
+				all_freed = false
+		_check(all_freed and occupied_b.size() == 12, "删除旋转建筑精确释放 12 格")
+
+	# 14e. 3×3 建筑旋转：占地恒为 9 格，方向正确保存
+	world.enter_build_mode(catalog[0], 2)
+	var origin_a2 := _find_valid_origin_ex(manager, catalog[0], DemoPlayerContext.FactionId.FOREST, Vector2i.ZERO, 2)
+	_check(origin_a2 != Vector2i(999999, 999999), "找到 3×3 合法区域 %s" % origin_a2)
+	construction.handle_map_click(origin_a2)
+	_check((construction.get_last_result().get("occupied_cells", []) as Array).size() == 9, "3×3 旋转 180° 占地仍为 9 格")
+	var placed_a2 := world.confirm_build_mode()
+	_check(bool(placed_a2.get("success", false)), "3×3 旋转 180° 建造成功")
+	var building_a2 := manager.get_building_by_id(str(placed_a2.get("building_id", "")))
+	if building_a2 != null:
+		_check(building_a2.rotation_index == 2, "3×3 建筑保存 rotation_index=2")
+		var node_a2 := manager._building_nodes.get(building_a2.building_id) as MeshInstance3D
+		_check(node_a2 != null and is_equal_approx(node_a2.rotation.y, PI), "3×3 节点旋转 180°")
+		_check(
+			bool(world.request_delete_building(building_a2.building_id).get("success", false)),
+			"3×3 旋转建筑可删除"
+		)
+
+	# 14f. 地图边缘旋转：0° 在界内，旋转 90° 越界立即转红且确认被拒绝
+	world.enter_build_mode(definition_b, 0)
+	var edge_origin := map_data.get_min_grid() + Vector2i(1, 2)
+	construction.handle_map_click(edge_origin)
+	var edge_0 := construction.get_last_result()
+	_check(
+		str(edge_0.get("reason", "")) != "占地区域超出地图边界",
+		"边缘 0° 方向占地不越界"
+	)
+	construction.rotate_building()
+	var edge_1 := construction.get_last_result()
+	_check(
+		not bool(edge_1.get("valid", true))
+		and str(edge_1.get("reason", "")) == "占地区域超出地图边界",
+		"边缘旋转 90° 越界立即非法"
+	)
+	_check(
+		construction._preview.mesh.material == construction._preview_invalid_material,
+		"越界旋转 Preview 转红"
+	)
+	var edge_confirm := world.confirm_build_mode()
+	_check(not bool(edge_confirm.get("success", true)), "越界旋转确认被拒绝")
+	world.exit_build_mode()
+	_check(construction.get_rotation_index() == 0, "退出建造模式方向重置为 0°")
+
 	world.queue_free()
 	_finish()
 
@@ -378,6 +562,24 @@ func _find_valid_origin_for(
 			for x in range(center.x - radius, center.x + radius + 1):
 				var origin := Vector2i(x, y)
 				var result := manager.validate_placement(definition, origin, faction_id)
+				if bool(result.get("valid", false)):
+					return origin
+	return Vector2i(999999, 999999)
+
+
+## 指定建筑定义与旋转方向的合法位置扫描（用于 3×4 / 旋转场景）
+func _find_valid_origin_ex(
+	manager: MapBuildingManager,
+	definition: MapBuildingDefinition,
+	faction_id: int,
+	center: Vector2i,
+	rotation_index: int
+) -> Vector2i:
+	for radius in range(8, 40):
+		for y in range(center.y - radius, center.y + radius + 1):
+			for x in range(center.x - radius, center.x + radius + 1):
+				var origin := Vector2i(x, y)
+				var result := manager.validate_placement(definition, origin, faction_id, rotation_index)
 				if bool(result.get("valid", false)):
 					return origin
 	return Vector2i(999999, 999999)

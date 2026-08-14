@@ -12,6 +12,10 @@ signal view_mode_changed(mode: int, display_name: String)
 signal build_mode_changed(active: bool)
 signal placement_state_changed(result: Dictionary)
 signal building_placed(snapshot: Dictionary)
+## 土地平整信号转发（来源：MapTerrainFlattenController）
+signal flatten_mode_changed(active: bool)
+signal flatten_state_changed(state: Dictionary)
+signal terrain_flattened(result: Dictionary)
 
 @export_file("*.tscn") var map_scene_path := "res://map/map_world.tscn"
 
@@ -98,6 +102,11 @@ func _load_map_world() -> void:
 		construction.build_mode_changed.connect(_on_build_mode_changed)
 		construction.placement_state_changed.connect(_on_placement_state_changed)
 		construction.building_placed.connect(_on_building_placed)
+	var flatten := _map_world.get_terrain_flatten_controller()
+	if flatten != null:
+		flatten.flatten_mode_changed.connect(_on_flatten_mode_changed)
+		flatten.flatten_state_changed.connect(_on_flatten_state_changed)
+		flatten.terrain_flattened.connect(_on_terrain_flattened)
 	_set_placeholder_visible(false)
 	_update_view_mode_button(_map_world.get_view_mode_display_name())
 	_scout_indicator.visible = false
@@ -179,9 +188,15 @@ func _on_building_selected(building_id: String, _tile_id: Vector2i) -> void:
 
 ## ——— 建造模式公开 API（供 HUD 调用） ———
 
-func enter_build_mode() -> void:
+func enter_build_mode(definition: MapBuildingDefinition = null, rotation_index: int = 0) -> void:
 	if _map_world != null:
-		_map_world.enter_build_mode()
+		_map_world.enter_build_mode(definition, rotation_index)
+
+
+## 地图建造阶段旋转（转发到 ConstructionController，锚点格不变）
+func rotate_building() -> void:
+	if _map_world != null:
+		_map_world.rotate_building()
 
 
 func cancel_build_mode() -> void:
@@ -216,6 +231,71 @@ func _on_placement_state_changed(result: Dictionary) -> void:
 
 func _on_building_placed(snapshot: Dictionary) -> void:
 	building_placed.emit(snapshot)
+
+
+## ——— 土地平整模式公开 API（供 HUD 调用） ———
+
+func enter_flatten_mode() -> void:
+	if _map_world != null:
+		_map_world.enter_flatten_mode()
+
+
+func cancel_flatten_mode() -> void:
+	if _map_world != null:
+		_map_world.exit_flatten_mode()
+
+
+## 解除平整位置锁定（“重新选择”）：预览恢复跟随鼠标
+func unlock_flatten_position() -> void:
+	var flatten := _get_flatten_controller()
+	if flatten != null:
+		flatten.unlock_position()
+
+
+func is_flatten_mode_active() -> bool:
+	return _map_world != null and _map_world.is_flatten_mode_active()
+
+
+## 调整目标高度等级 / 平整范围（每次调整后控制器会重新校验并刷新预览）
+func adjust_flatten_height(delta: int) -> void:
+	var flatten := _get_flatten_controller()
+	if flatten != null:
+		flatten.adjust_target_height(delta)
+
+
+func adjust_flatten_width(delta: int) -> void:
+	var flatten := _get_flatten_controller()
+	if flatten != null:
+		flatten.adjust_region_width(delta)
+
+
+func adjust_flatten_length(delta: int) -> void:
+	var flatten := _get_flatten_controller()
+	if flatten != null:
+		flatten.adjust_region_length(delta)
+
+
+func confirm_flatten() -> Dictionary:
+	var flatten := _get_flatten_controller()
+	if flatten == null:
+		return {"success": false, "reason": "地图尚未就绪"}
+	return flatten.confirm()
+
+
+func _get_flatten_controller() -> MapTerrainFlattenController:
+	return _map_world.get_terrain_flatten_controller() if _map_world != null else null
+
+
+func _on_flatten_mode_changed(active: bool) -> void:
+	flatten_mode_changed.emit(active)
+
+
+func _on_flatten_state_changed(state: Dictionary) -> void:
+	flatten_state_changed.emit(state)
+
+
+func _on_terrain_flattened(result: Dictionary) -> void:
+	terrain_flattened.emit(result)
 
 
 func _on_selection_cleared() -> void:

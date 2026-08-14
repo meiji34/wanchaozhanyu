@@ -105,10 +105,15 @@ func _handle_mouse_motion(
 			_scale_delta(event.relative, source_size, viewport_size)
 		)
 		return true
-	# 建造模式下鼠标悬停：预览跟随指向格子。
+	# 建造/平整模式下鼠标悬停：预览跟随指向格子。
 	# 到此处时未按下拖拽、未旋转，不影响既有平移/旋转逻辑。
 	if _map_world.is_build_mode_active():
 		_map_world.hover_build_position(
+			_scale_position(event.position, source_size, viewport_size)
+		)
+		return true
+	if _map_world.is_flatten_mode_active():
+		_map_world.hover_flatten_position(
 			_scale_position(event.position, source_size, viewport_size)
 		)
 		return true

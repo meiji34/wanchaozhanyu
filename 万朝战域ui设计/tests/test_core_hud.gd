@@ -155,3 +155,74 @@ func test_hud_builds_overlay_and_selection_drawer_states() -> void:
 	hud.call("_on_map_selection_cleared")
 	assert_false(selection_drawer.visible)
 	assert_false(interaction_panel.visible)
+
+
+func test_hud_building_selection_bar_and_rotation_flow() -> void:
+	var packed := load("res://ui/hud/main_hud.tscn") as PackedScene
+	assert_true(packed != null)
+	if packed == null:
+		return
+	var hud := track(packed.instantiate()) as Control
+	(Engine.get_main_loop() as SceneTree).root.add_child(hud)
+	var map_area := hud._map_area as MapArea
+	map_area.call("_load_map_world")
+	var world := map_area.get_map_world()
+	assert_true(world != null, "地图必须挂载后才能测试建造流程")
+	if world == null:
+		return
+	var construction := world.get_construction_controller()
+	var select_panel := hud.find_child("BuildingSelectPanel", true, false) as PanelContainer
+	assert_true(select_panel != null, "建筑选择栏必须存在")
+	assert_false(select_panel.visible, "选择栏初始隐藏")
+	# 打开选择栏：只保留建筑选择、3D 展示和开始建造，不再出现方向按钮
+	hud.call("_toggle_build_mode")
+	assert_true(select_panel.visible, "建造按钮打开建筑选择栏")
+	for node in select_panel.find_children("*", "Button", true, false):
+		var button := node as Button
+		assert_false(
+			["北", "东", "南", "西"].has(button.text),
+			"建筑选择栏不得保留方向按钮：%s" % button.text
+		)
+	var preview_root := hud._select_preview_root as Node3D
+	var preview_mesh := hud._select_preview_mesh as MeshInstance3D
+	assert_true(preview_root != null)
+	assert_true(preview_mesh != null)
+	# 展示动画只旋转 PreviewRoot，不改变模型局部方向或任何真实 rotation_index
+	hud.call("_process", 2.0)
+	assert_gt(preview_root.rotation.y, 0.0, "选择栏 3D Preview 应缓慢自动旋转")
+	assert_eq(preview_mesh.rotation, Vector3.ZERO, "展示模型局部方向保持默认值")
+	# A → B → A 快速切换：复用同一个 SubViewport/Camera/Light，并从统一展示角度重启
+	hud.call("_on_building_option_pressed", 1)
+	assert_true(is_zero_approx(preview_root.rotation.y), "切换建筑 B 时展示角度重置")
+	hud.call("_on_building_option_pressed", 0)
+	assert_true(is_zero_approx(preview_root.rotation.y), "切回建筑 A 时展示角度重置")
+	hud.call("_on_building_option_pressed", 1)
+	assert_eq(select_panel.find_children("*", "SubViewport", true, false).size(), 1)
+	assert_eq(select_panel.find_children("*", "Camera3D", true, false).size(), 1)
+	assert_eq(select_panel.find_children("*", "DirectionalLight3D", true, false).size(), 1)
+	assert_eq(
+		(preview_mesh.mesh as BoxMesh).size,
+		(hud._building_catalog[1] as MapBuildingDefinition).get_world_size(
+			MapGenerationConfig.DEFAULT_CELL_SIZE
+		),
+		"选择预览网格保持基础 3×4 尺寸"
+	)
+	# 让 UI Preview 累积任意视觉角度后开始建造，地图仍必须使用默认真实方向 0
+	hud.call("_process", 3.0)
+	assert_gt(preview_root.rotation.y, 0.0)
+	hud.call("_on_start_build_pressed")
+	assert_false(select_panel.visible, "开始建造后选择栏关闭")
+	assert_true(map_area.is_build_mode_active(), "开始建造后进入地图建造模式")
+	assert_eq(construction.get_rotation_index(), 0, "UI Preview 视觉角度不得写入真实建造方向")
+	var build_panel := hud.find_child("ConstructionPanel", true, false) as PanelContainer
+	assert_true(build_panel.visible, "建造面板显示")
+	assert_contains(hud._build_title_label.text, "北", "地图 Preview 从默认方向开始")
+	# 地图阶段旋转按钮仍完整保留：0°→90°
+	hud.call("_on_build_rotate_pressed")
+	assert_eq(construction.get_rotation_index(), 1, "地图旋转按钮切换到 90°")
+	# 取消建造：退出模式；再次打开选择栏仍从统一展示角度开始
+	hud.call("_on_build_cancel_pressed")
+	assert_false(map_area.is_build_mode_active(), "取消退出建造模式")
+	hud.call("_toggle_build_mode")
+	assert_true(is_zero_approx(preview_root.rotation.y), "取消后重开选择栏展示角度重置")
+	hud.call("_close_building_select_panel")
