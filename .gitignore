@@ -8,7 +8,6 @@ game_output.txt
 
 # ===== 外部文档（大型设计文档/报告，不随代码上传）=====
 *.docx
-第一版Demo地图功能盘点报告.md
 地图方案.md
 MCP_SETUP.md
 MAP_AGENTS.md
